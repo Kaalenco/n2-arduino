@@ -12,6 +12,8 @@
 
 void setup();
 void loop();
+void handleEvents();
+void raiseEvents();
 
 // define display functions
 void displayInit();
@@ -21,7 +23,8 @@ void displayText(int row, String text);
 void keypadInit();
 void keypadEvents();
 
-void handlePushButtonRealeaseEvent(int event, int param);
+void handlePushButtonReleaseEvent(int event, int param);
+void handleRotaryEvent(int event, int param);
 void handleClockTimeEvent(int event, int param);
 void readBarometer(int event, int param);
 
@@ -29,8 +32,8 @@ LiquidCrystal_I2C lcd(0x27, 16, 2);
 Barometer::BPM85 barometer;
 Clock::RtcClock clock;
 
-Controls::ButtonControl pushButton(PIND6);
-Controls::RotaryEncoder rotary(INT8_MAX, INT8_MAX, PIND5);
+Controls::ButtonControl pushButton(PIND4);
+Controls::RotaryEncoder rotary(PIND7, PIND6, PIND5);
 
 #define DM_CLK 7
 #define DM_DIO 6
@@ -62,12 +65,17 @@ void setup() {
   }  
 */
 
-  if(!pushButton.eventManager.addListener( EventManager::EventType::kEventKeyRelease, handlePushButtonRealeaseEvent ))
+  if(!pushButton.eventManager.addListener( EventManager::EventType::kEventKeyRelease, handlePushButtonReleaseEvent ))
   {
       Serial.println("Failed to add handlePushButtonRealeaseEvent listener");
   }  
 
-  if(!rotary.eventManager.addListener( EventManager::EventType::kEventKeyRelease, handlePushButtonRealeaseEvent ))
+  if(!rotary.eventManager.addListener( EventManager::EventType::kEventKeyRelease, handlePushButtonReleaseEvent ))
+  {
+      Serial.println("Failed to add handlePushButtonRealeaseEvent listener");
+  }  
+
+  if(!rotary.eventManager.addListener( EventManager::EventType::kEventMenu0, handleRotaryEvent ))
   {
       Serial.println("Failed to add handlePushButtonRealeaseEvent listener");
   }  
@@ -95,20 +103,42 @@ void setup() {
 
 // the loop function runs over and over again forever
 void loop() {
-  // Handle any events that are in the queue
+  unsigned long currentMillis = millis();
+  handleEvents();
+
+  // do some other stuff here, like checking and validating sensor data
+
+  raiseEvents();
+
+  // wait for the next loop in low power mode
+  unsigned long nextMillis = millis();
+  unsigned long sleepTime = 200 - (nextMillis - currentMillis);
+  if(sleepTime > 0)
+  {
+    delayMicroseconds((unsigned int)sleepTime);
+  }
+  
+}
+
+void handleEvents()
+{
   clock.eventManager.processAllEvents();
   pushButton.eventManager.processAllEvents();
   rotary.eventManager.processAllEvents();
+}
 
+void raiseEvents()
+{
   clock.Loop();
   pushButton.Loop();
   rotary.Loop();
 }
 
+
 bool pushButtonToggle = false;
-void handlePushButtonRealeaseEvent(int event, int param)
+void handlePushButtonReleaseEvent(int event, int param)
 {
-  Serial.println("Push button released");
+  Serial.println("Push button released: " + String(param) );
   if(param == PIND6)
   {
     Serial.println("Push button on D6 released");
@@ -123,6 +153,11 @@ void handlePushButtonRealeaseEvent(int event, int param)
       pushButtonToggle = true;
     }
   }
+}
+
+void handleRotaryEvent(int event, int param)
+{
+  Serial.println("Rotary value: " + String(param) );
 }
 
 void handleClockTimeEvent(int event, int param)

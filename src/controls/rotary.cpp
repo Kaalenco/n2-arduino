@@ -67,25 +67,39 @@ namespace Controls {
     }
 
     bool RotaryEncoder::LoopEncoder() { 
-        rotaryState = digitalRead(rotaryA); 
-        if (rotaryState != lastRotaryState){     
-            if (digitalRead(rotaryB) != rotaryState) 
-            { 
-                rotaryCounter ++;
-                if (!eventManager.queueEvent(EventManager::EventType::kEventUser0, rotaryCounter)) {
+        unsigned long currentMillis = millis();
+        bool rotaryState = (digitalRead(rotaryA)==0);
+        if (rotaryState != lastRotaryState) {
+            lastRotaryDebounceTime = millis();
+            lastRotaryDebounceState = rotaryState;
+        }
 
-                    return false;
+        if ((currentMillis - lastDebounceTime) > debounceDelay) {
+            if (rotaryState != lastRotaryState){     
+                bool rotaryBState = (digitalRead(rotaryB)==0);
+                if (rotaryBState != rotaryState) 
+                { 
+                    rotaryCounter ++;
+                } 
+                else 
+                {
+                    rotaryCounter --;
                 }
+
+                // Raise an event only when stable (both pins at the same state)
+                if(rotaryState && rotaryCounter != lastRotaryCounter)
+                {
+                    lastRotaryCounter = rotaryCounter;
+                    if (!eventManager.queueEvent(EventManager::EventType::kEventMenu0, rotaryCounter)) 
+                    {
+                        return false;
+                    }
+                }
+                lastRotaryState = rotaryState;   
             } 
-            else 
-            {
-                rotaryCounter --;
-                if (!eventManager.queueEvent(EventManager::EventType::kEventUser1, rotaryCounter)){
-                    return false;                
-                }
-            }
-        } 
-        lastRotaryState = rotaryState; // Updates the previous state of the outputA with the current state     
+        }
+
+        
         return true;   
     }
 

@@ -34,8 +34,10 @@ namespace Controls
 
     class RotaryEncoder : public ButtonControl {
         private:
-            int rotaryState;
-            int lastRotaryState;
+            bool lastRotaryState;
+            unsigned long lastRotaryDebounceTime;
+            bool lastRotaryDebounceState;
+            int lastRotaryCounter;
             int rotaryCounter;
             uint8_t rotaryA = UINT8_MAX;
             uint8_t rotaryB = UINT8_MAX;
