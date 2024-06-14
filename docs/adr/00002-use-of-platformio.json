@@ -1,0 +1,9 @@
+{
+  "DateTime": "2024-06-14T00:00:00+02:00",
+  "FileName": "00002-use-of-platformio",
+  "RecordId": 2,
+  "TemplateType": "Ad",
+  "Title": "Use of platformio",
+  "Context": "This project makes use of platform IO for managing the build, upload and tests. The original idea was to use Visual Studio and the VS tool for embedded development (Visual Micro) but due to the changed licencing option, I was looking for another solution.",
+  "References": {}
+}

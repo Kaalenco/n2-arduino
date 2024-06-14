@@ -1,0 +1,9 @@
+{
+  "DateTime": "2024-06-14T00:00:00+02:00",
+  "FileName": "00003-user-interaction",
+  "RecordId": 3,
+  "TemplateType": "Ad",
+  "Title": "User interaction",
+  "Context": "Embedded applications need interaction with its users using input and outpout devices. Specifically input devices pose a challenge as users are much slower that computers and waiting for user input could slow down the application or make it unresponsive. In languages like C#, there is a possibility to control application flow using events. Using this in an embedded (arduino) environment would be a possible solution for this issue.",
+  "References": {}
+}

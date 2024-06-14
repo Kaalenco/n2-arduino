@@ -1,0 +1,9 @@
+{
+  "DateTime": "2024-06-14T00:00:00+02:00",
+  "FileName": "00001-record-architecture-decisions-initialization",
+  "RecordId": 1,
+  "Status": "Accepted",
+  "Title": " 00001. Record Architecture Decisions initialization",
+  "Context": "Architecture for agile projects has to be described and defined differently. Not all decisions will be made at once, nor will all of them be done when the project begins.",
+  "References": {}
+}

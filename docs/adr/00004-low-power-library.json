@@ -1,0 +1,11 @@
+{
+  "DateTime": "2024-06-14T00:00:00+02:00",
+  "FileName": "00004-low-power-library",
+  "RecordId": 4,
+  "TemplateType": "Ad",
+  "Title": "Low power library",
+  "Context": "Switching to a low power at the end of each cycle (loop) could help save energy. The device could even be set to a low power mode if it has little or no activity on its input.",
+  "References": {
+    "5": "Update"
+  }
+}
