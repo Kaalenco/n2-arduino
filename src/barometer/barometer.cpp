@@ -105,9 +105,12 @@ namespace Barometer {
     }
 
     bool BPM85::begin() {
+        unsigned int ut_init = 0;
         Wire.begin();
         bmp085Calibration();
-        return bmp085ReadUT() != 0;
+        ut_init = bmp085ReadUT();
+        _active = ut_init != 0xFFFF;
+        return _active;
     }
 
     void BPM85::readPressure()
@@ -144,6 +147,11 @@ namespace Barometer {
         pressure = p;
     }
 
+    bool BPM85::active()
+    {
+        return _active;
+    }
+
     void BPM85::readTemperature()
     {
         long x1, x2;
@@ -160,7 +168,6 @@ namespace Barometer {
     // Updates temperature and pressure
     void BPM85::readAltitude()
     {
-        const double p0 = 101300;     
         // Read temperature and pressure
         readTemperature();
         readPressure();
@@ -168,6 +175,7 @@ namespace Barometer {
         altitude = (float)44330 * (1 - pow(((double) pressure/p0), 0.190295));
     }
 
+    // Set the pressure at sea level (Pa) and recalculates the altitude
     void BPM85::Calibrate(float  p)
     {
         p0 = p;

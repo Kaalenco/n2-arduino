@@ -10,6 +10,9 @@
 #include "func.h"
 #include "controls/controls.h"
 
+// Temperature
+// https://microcontrollerslab.com/max6675-thermocouple-arduino-tutorial/
+
 void setup();
 void loop();
 void handleEvents();
@@ -33,6 +36,8 @@ Barometer::BPM85 barometer;
 Clock::RtcClock clock;
 
 Controls::ButtonControl pushButton(PIND4);
+
+// A, B, button
 Controls::RotaryEncoder rotary(PIND7, PIND6, PIND5);
 
 #define DM_CLK 7
@@ -53,17 +58,16 @@ void setup() {
   pushButton.Begin();
   rotary.Begin();
 
-/*
+
   if(!clock.eventManager.addListener( EventManager::EventType::kEventTimer0, readBarometer ))
   {
     Serial.println("Failed to add readBarometer listener");
   }
-
+ 
   if(!clock.eventManager.addListener( EventManager::EventType::kEventTimer0, handleClockTimeEvent ))
   {
       Serial.println("Failed to add handleTimeEvent listener");
   }  
-*/
 
   if(!pushButton.eventManager.addListener( EventManager::EventType::kEventKeyRelease, handlePushButtonReleaseEvent ))
   {
@@ -98,6 +102,14 @@ void setup() {
   else
   {
     Serial.println("Sensor BMP085 found");
+  }
+
+    if(!clock.RtcFound){
+    Serial.println("Real time clock not found, check the connections and battery");
+  }
+  else
+  {
+    Serial.println("Real time clock found");
   }
 }
 
@@ -162,7 +174,7 @@ void handleRotaryEvent(int event, int param)
 
 void handleClockTimeEvent(int event, int param)
 {
-  Serial.println("Clock event");
+  if(!clock.RtcFound) return;
   clock.ReadTime();
 
 // ledDisplay.clear();
@@ -172,7 +184,7 @@ void handleClockTimeEvent(int event, int param)
 //    ledDisplay.showNumberDecEx(hm, 0b01000000, true);
 
   displayText(1, 
-    "T= " 
+    "" 
     + left_pad(String(clock.hour), 2, '0') 
     + ":" + left_pad(String(clock.minute), 2, '0') 
     + ":" + left_pad(String(clock.second), 2, '0') 
@@ -180,15 +192,17 @@ void handleClockTimeEvent(int event, int param)
 }
 
 void readBarometer(int event, int param){
+  if(! barometer.active()) return;
   barometer.readAltitude();
 
   Serial.println("Pressure: " + String(barometer.currentPressure()) + "Hpa");
 
   float t = barometer.currentTemperature();
   float alt = barometer.currentAltitude();
+  float altft = alt * 3.28084;
   displayText(0, 
-    "T: " + String(t) + "C " +
-    "ALT: " + String(alt) + "m");
+    "" + left_pad(String(t,0),3,' ') + "C" +
+    " " + left_pad(String(altft,0),4,' ') + "ft");
 }
 
 // Keypad functions
@@ -254,7 +268,6 @@ void displayInit()
 
 void displayText(int row, String text)
 {
-  Serial.println(text);
   lcd.setCursor(0, row);
   lcd.print(text);
 }

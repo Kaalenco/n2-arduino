@@ -15,7 +15,7 @@ namespace Clock {
             int hour = 0;
             int minute = 0;
             int second = 0;
-            int hms = 0;
+            long hms = 0;
 
             RtcClock();
             ~RtcClock();
@@ -25,7 +25,8 @@ namespace Clock {
             void Loop();
         private:
             /* data */
-            RTC_DS1307 RTC;
+            /* RTC_DS1307 RTC; */
+            RTC_PCF8523  RTC;
             unsigned long lastTimerEvent = 0;
     };
 }

@@ -17,7 +17,7 @@ namespace Barometer {
     // 3  = 0.25m
     const unsigned char OSS = 0;
 
-    float  p0 = 101300; // Pressure at sea level (Pa)
+    float  p0 = 103800; // Pressure at sea level (Pa)
 
     // Calibration values
     int ac1;
@@ -40,6 +40,7 @@ namespace Barometer {
     short tempature;
     long pressure;
     float altitude;
+    bool _active = false;
 
     void bmp085Calibration();
     unsigned int bmp085ReadUT();
@@ -53,6 +54,7 @@ namespace Barometer {
     void readAltitude();
     void Calibrate(float  p);
 
+    bool active();
     short currentTemperature();
     double currentPressure();
     float currentAltitude();
