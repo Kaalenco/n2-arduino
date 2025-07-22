@@ -26,10 +26,14 @@ void displayText(int row, String text);
 void keypadInit();
 void keypadEvents();
 
+// Event handler function declarations
 void handlePushButtonReleaseEvent(int event, int param);
 void handleRotaryEvent(int event, int param);
 void handleClockTimeEvent(int event, int param);
 void readBarometer(int event, int param);
+
+// Event system initialization
+void initializeEventHandlers();
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 Barometer::BPM85 barometer;
@@ -58,32 +62,8 @@ void setup() {
   pushButton.Begin();
   rotary.Begin();
 
-
-  if(!clock.eventManager.addListener( EventManager::EventType::kEventTimer0, readBarometer ))
-  {
-    Serial.println("Failed to add readBarometer listener");
-  }
- 
-  if(!clock.eventManager.addListener( EventManager::EventType::kEventTimer0, handleClockTimeEvent ))
-  {
-      Serial.println("Failed to add handleTimeEvent listener");
-  }  
-
-  if(!pushButton.eventManager.addListener( EventManager::EventType::kEventKeyRelease, handlePushButtonReleaseEvent ))
-  {
-      Serial.println("Failed to add handlePushButtonRealeaseEvent listener");
-  }  
-
-  if(!rotary.eventManager.addListener( EventManager::EventType::kEventKeyRelease, handlePushButtonReleaseEvent ))
-  {
-      Serial.println("Failed to add handlePushButtonRealeaseEvent listener");
-  }  
-
-  if(!rotary.eventManager.addListener( EventManager::EventType::kEventMenu0, handleRotaryEvent ))
-  {
-      Serial.println("Failed to add handlePushButtonRealeaseEvent listener");
-  }  
-
+  // Initialize event handlers
+  initializeEventHandlers();
 
   // Initialize led display (0 to 7)
   // ledDisplay.setBrightness(0x03);
@@ -110,6 +90,15 @@ void setup() {
   else
   {
     Serial.println("Real time clock found");
+    
+    // Example usage of new date/time configuration functions:
+    // clock.SetDateTimeComponent(Clock::YEAR_2DIGIT, 24);  // Set year to 2024
+    // clock.SetDateTimeComponent(Clock::MONTH, 12);        // Set month to December
+    // clock.SetDateTimeComponent(Clock::DAY, 25);          // Set day to 25th
+    // clock.SetDateTimeComponent(Clock::HOUR, 14);         // Set hour to 2 PM
+    // clock.SetDateTimeComponent(Clock::MINUTE, 30);       // Set minute to 30
+    // clock.SetDateTimeComponent(Clock::SECOND, 0);        // Set second to 0
+    // Serial.println("Current DateTime: " + clock.GetFormattedDateTime());
   }
 }
 
@@ -146,7 +135,83 @@ void raiseEvents()
   rotary.Loop();
 }
 
+// ========================================
+// EVENT SYSTEM INITIALIZATION
+// ========================================
 
+void initializeEventHandlers()
+{
+  // Register barometer event handler
+  if(!clock.eventManager.addListener( EventManager::EventType::kEventTimer0, readBarometer ))
+  {
+    Serial.println("Failed to add readBarometer listener");
+  }
+ 
+  // Register clock time event handler
+  if(!clock.eventManager.addListener( EventManager::EventType::kEventTimer0, handleClockTimeEvent ))
+  {
+      Serial.println("Failed to add handleTimeEvent listener");
+  }  
+
+  // Register push button event handler
+  if(!pushButton.eventManager.addListener( EventManager::EventType::kEventKeyRelease, handlePushButtonReleaseEvent ))
+  {
+      Serial.println("Failed to add handlePushButtonReleaseEvent listener");
+  }  
+
+  // Register rotary encoder button event handler
+  if(!rotary.eventManager.addListener( EventManager::EventType::kEventKeyRelease, handlePushButtonReleaseEvent ))
+  {
+      Serial.println("Failed to add handlePushButtonReleaseEvent listener");
+  }  
+
+  // Register rotary encoder rotation event handler
+  if(!rotary.eventManager.addListener( EventManager::EventType::kEventMenu0, handleRotaryEvent ))
+  {
+      Serial.println("Failed to add handleRotaryEvent listener");
+  }  
+}
+
+// ========================================
+// EVENT HANDLERS
+// ========================================
+
+// Barometer Event Handler
+void readBarometer(int event, int param){
+  if(! barometer.active()) return;
+  barometer.readAltitude();
+
+  Serial.println("Pressure: " + String(barometer.currentPressure()) + "Hpa");
+
+  float t = barometer.currentTemperature();
+  float alt = barometer.currentAltitude();
+  float altft = alt * 3.28084;
+  displayText(0, 
+    "" + left_pad(String(t,0),3,' ') + "C" +
+    " " + left_pad(String(altft,0),4,' ') + "ft");
+}
+
+// Clock Time Event Handler
+void handleClockTimeEvent(int event, int param)
+{
+  if(!clock.RtcFound) return;
+  clock.ReadTime();
+
+// ledDisplay.clear();
+//  if(s % 2 == 0)
+//    ledDisplay.showNumberDecEx(hm, 0b00000000, true);
+//  else
+//    ledDisplay.showNumberDecEx(hm, 0b01000000, true);
+
+  displayText(1, 
+    "" 
+    + left_pad(String(clock.hour), 2, '0') 
+    + ":" + left_pad(String(clock.minute), 2, '0') 
+    + ":" + left_pad(String(clock.second), 2, '0') 
+    );
+}
+
+// Push Button Event Handler
 bool pushButtonToggle = false;
 void handlePushButtonReleaseEvent(int event, int param)
 {
@@ -167,45 +232,15 @@ void handlePushButtonReleaseEvent(int event, int param)
   }
 }
 
+// Rotary Encoder Event Handler
 void handleRotaryEvent(int event, int param)
 {
   Serial.println("Rotary value: " + String(param) );
 }
 
-void handleClockTimeEvent(int event, int param)
-{
-  if(!clock.RtcFound) return;
-  clock.ReadTime();
-
-// ledDisplay.clear();
-//  if(s % 2 == 0)
-//    ledDisplay.showNumberDecEx(hm, 0b00000000, true);
-//  else
-//    ledDisplay.showNumberDecEx(hm, 0b01000000, true);
-
-  displayText(1, 
-    "" 
-    + left_pad(String(clock.hour), 2, '0') 
-    + ":" + left_pad(String(clock.minute), 2, '0') 
-    + ":" + left_pad(String(clock.second), 2, '0') 
-    );
-}
-
-void readBarometer(int event, int param){
-  if(! barometer.active()) return;
-  barometer.readAltitude();
-
-  Serial.println("Pressure: " + String(barometer.currentPressure()) + "Hpa");
-
-  float t = barometer.currentTemperature();
-  float alt = barometer.currentAltitude();
-  float altft = alt * 3.28084;
-  displayText(0, 
-    "" + left_pad(String(t,0),3,' ') + "C" +
-    " " + left_pad(String(altft,0),4,' ') + "ft");
-}
-
-// Keypad functions
+// ========================================
+// KEYPAD FUNCTIONS
+// ========================================
 int leftButtonValue = 0;
 int rightButtonValue = 0;
 int setButtonValue = 0;
@@ -241,7 +276,9 @@ void keypadEvents(){
   }
 }
 
-// Display functions
+// ========================================
+// DISPLAY FUNCTIONS
+// ========================================
 int displayBacklight = 0;
 void setBacklight(int event, int param)
 {
