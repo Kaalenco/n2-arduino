@@ -171,8 +171,10 @@ namespace Clock {
             // Convert 2-digit year to 4-digit year (assuming 20xx)
             int fullYear = 2000 + configYear;
             
-            DateTime newDateTime(fullYear, configMonth, configDay, 
-                               configHour, configMinute, configSecond);
+            DateTime newDateTime(
+                fullYear, configMonth, configDay, 
+                configHour, configMinute, configSecond
+            );
             
             RTC.adjust(newDateTime);
             currentTime = RTC.now();
