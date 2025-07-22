@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include "barometer.h"
+#include <barometer.h>
 
 using namespace std;
 
@@ -161,7 +161,7 @@ namespace Barometer {
         x2 = ((long)mc << 11)/(x1 + md);
         b5 = x1 + x2;
 
-        tempature = ((b5 + 8)>>4);  
+        temperature = ((b5 + 8)>>4);  
     }
 
     // Calculate altitude given a pressure reading
@@ -184,7 +184,7 @@ namespace Barometer {
 
     short BPM85::currentTemperature()
     {
-        return tempature / 10;
+        return temperature / 10;
     }
 
     double BPM85::currentPressure()

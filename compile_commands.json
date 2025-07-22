@@ -1,0 +1,296 @@
+[
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\FrameworkArduino\\CDC.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\CDC.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\CDC.cpp",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\CDC.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\FrameworkArduino\\HardwareSerial.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\HardwareSerial.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\HardwareSerial.cpp",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\HardwareSerial.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\FrameworkArduino\\HardwareSerial0.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\HardwareSerial0.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\HardwareSerial0.cpp",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\HardwareSerial0.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\FrameworkArduino\\HardwareSerial1.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\HardwareSerial1.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\HardwareSerial1.cpp",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\HardwareSerial1.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\FrameworkArduino\\HardwareSerial2.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\HardwareSerial2.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\HardwareSerial2.cpp",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\HardwareSerial2.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\FrameworkArduino\\HardwareSerial3.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\HardwareSerial3.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\HardwareSerial3.cpp",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\HardwareSerial3.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\FrameworkArduino\\IPAddress.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\IPAddress.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\IPAddress.cpp",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\IPAddress.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\FrameworkArduino\\PluggableUSB.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\PluggableUSB.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\PluggableUSB.cpp",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\PluggableUSB.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\FrameworkArduino\\Print.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\Print.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\Print.cpp",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\Print.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\FrameworkArduino\\Stream.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\Stream.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\Stream.cpp",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\Stream.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\FrameworkArduino\\Tone.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\Tone.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\Tone.cpp",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\Tone.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\FrameworkArduino\\USBCore.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\USBCore.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\USBCore.cpp",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\USBCore.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-gcc.exe -o .pio\\build\\Default\\FrameworkArduino\\WInterrupts.c.o -c -std=gnu11 -fno-fat-lto-objects -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\WInterrupts.c",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\WInterrupts.c",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\WInterrupts.c.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\FrameworkArduino\\WMath.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\WMath.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\WMath.cpp",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\WMath.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\FrameworkArduino\\WString.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\WString.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\WString.cpp",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\WString.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\FrameworkArduino\\abi.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\abi.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\abi.cpp",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\abi.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-gcc.exe -o .pio\\build\\Default\\FrameworkArduino\\hooks.c.o -c -std=gnu11 -fno-fat-lto-objects -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\hooks.c",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\hooks.c",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\hooks.c.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\FrameworkArduino\\main.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\main.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\main.cpp",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\main.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\FrameworkArduino\\new.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\new.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\new.cpp",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\new.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-gcc.exe -o .pio\\build\\Default\\FrameworkArduino\\wiring.c.o -c -std=gnu11 -fno-fat-lto-objects -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\wiring.c",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\wiring.c",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\wiring.c.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-gcc.exe -o .pio\\build\\Default\\FrameworkArduino\\wiring_analog.c.o -c -std=gnu11 -fno-fat-lto-objects -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\wiring_analog.c",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\wiring_analog.c",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\wiring_analog.c.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-gcc.exe -o .pio\\build\\Default\\FrameworkArduino\\wiring_digital.c.o -c -std=gnu11 -fno-fat-lto-objects -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\wiring_digital.c",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\wiring_digital.c",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\wiring_digital.c.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-gcc.exe -mmcu=atmega328p -x assembler-with-cpp -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs -c -o .pio\\build\\Default\\FrameworkArduino\\wiring_pulse.S.o C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\wiring_pulse.S",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\wiring_pulse.S",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\wiring_pulse.S.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-gcc.exe -o .pio\\build\\Default\\FrameworkArduino\\wiring_pulse.c.o -c -std=gnu11 -fno-fat-lto-objects -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\wiring_pulse.c",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\wiring_pulse.c",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\wiring_pulse.c.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-gcc.exe -o .pio\\build\\Default\\FrameworkArduino\\wiring_shift.c.o -c -std=gnu11 -fno-fat-lto-objects -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\wiring_shift.c",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino\\wiring_shift.c",
+        "output": ".pio\\build\\Default\\FrameworkArduino\\wiring_shift.c.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\libac4\\SPI\\SPI.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src\\SPI.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src\\SPI.cpp",
+        "output": ".pio\\build\\Default\\libac4\\SPI\\SPI.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\lib999\\Wire\\Wire.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src\\Wire.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src\\Wire.cpp",
+        "output": ".pio\\build\\Default\\lib999\\Wire\\Wire.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-gcc.exe -o .pio\\build\\Default\\lib999\\Wire\\utility\\twi.c.o -c -std=gnu11 -fno-fat-lto-objects -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src\\utility\\twi.c",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "C:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src\\utility\\twi.c",
+        "output": ".pio\\build\\Default\\lib999\\Wire\\utility\\twi.c.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\libbc6\\LiquidCrystal_I2C\\LiquidCrystal_I2C.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -I.pio\\libdeps\\Default\\LiquidCrystal_I2C -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs .pio\\libdeps\\Default\\LiquidCrystal_I2C\\LiquidCrystal_I2C.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": ".pio\\libdeps\\Default\\LiquidCrystal_I2C\\LiquidCrystal_I2C.cpp",
+        "output": ".pio\\build\\Default\\libbc6\\LiquidCrystal_I2C\\LiquidCrystal_I2C.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o \".pio\\build\\Default\\lib1df\\Adafruit BusIO\\Adafruit_BusIO_Register.cpp.o\" -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs \".pio\\libdeps\\Default\\Adafruit BusIO\\Adafruit_BusIO_Register.cpp\"",
+        "directory": "C:\\git\\n2-arduino",
+        "file": ".pio\\libdeps\\Default\\Adafruit BusIO\\Adafruit_BusIO_Register.cpp",
+        "output": ".pio\\build\\Default\\lib1df\\Adafruit BusIO\\Adafruit_BusIO_Register.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o \".pio\\build\\Default\\lib1df\\Adafruit BusIO\\Adafruit_GenericDevice.cpp.o\" -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs \".pio\\libdeps\\Default\\Adafruit BusIO\\Adafruit_GenericDevice.cpp\"",
+        "directory": "C:\\git\\n2-arduino",
+        "file": ".pio\\libdeps\\Default\\Adafruit BusIO\\Adafruit_GenericDevice.cpp",
+        "output": ".pio\\build\\Default\\lib1df\\Adafruit BusIO\\Adafruit_GenericDevice.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o \".pio\\build\\Default\\lib1df\\Adafruit BusIO\\Adafruit_I2CDevice.cpp.o\" -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs \".pio\\libdeps\\Default\\Adafruit BusIO\\Adafruit_I2CDevice.cpp\"",
+        "directory": "C:\\git\\n2-arduino",
+        "file": ".pio\\libdeps\\Default\\Adafruit BusIO\\Adafruit_I2CDevice.cpp",
+        "output": ".pio\\build\\Default\\lib1df\\Adafruit BusIO\\Adafruit_I2CDevice.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o \".pio\\build\\Default\\lib1df\\Adafruit BusIO\\Adafruit_SPIDevice.cpp.o\" -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs \".pio\\libdeps\\Default\\Adafruit BusIO\\Adafruit_SPIDevice.cpp\"",
+        "directory": "C:\\git\\n2-arduino",
+        "file": ".pio\\libdeps\\Default\\Adafruit BusIO\\Adafruit_SPIDevice.cpp",
+        "output": ".pio\\build\\Default\\lib1df\\Adafruit BusIO\\Adafruit_SPIDevice.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\lib161\\RTClib\\RTC_DS1307.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -I.pio\\libdeps\\Default\\RTClib\\src \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs .pio\\libdeps\\Default\\RTClib\\src\\RTC_DS1307.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": ".pio\\libdeps\\Default\\RTClib\\src\\RTC_DS1307.cpp",
+        "output": ".pio\\build\\Default\\lib161\\RTClib\\RTC_DS1307.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\lib161\\RTClib\\RTC_DS3231.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -I.pio\\libdeps\\Default\\RTClib\\src \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs .pio\\libdeps\\Default\\RTClib\\src\\RTC_DS3231.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": ".pio\\libdeps\\Default\\RTClib\\src\\RTC_DS3231.cpp",
+        "output": ".pio\\build\\Default\\lib161\\RTClib\\RTC_DS3231.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\lib161\\RTClib\\RTC_Micros.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -I.pio\\libdeps\\Default\\RTClib\\src \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs .pio\\libdeps\\Default\\RTClib\\src\\RTC_Micros.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": ".pio\\libdeps\\Default\\RTClib\\src\\RTC_Micros.cpp",
+        "output": ".pio\\build\\Default\\lib161\\RTClib\\RTC_Micros.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\lib161\\RTClib\\RTC_Millis.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -I.pio\\libdeps\\Default\\RTClib\\src \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs .pio\\libdeps\\Default\\RTClib\\src\\RTC_Millis.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": ".pio\\libdeps\\Default\\RTClib\\src\\RTC_Millis.cpp",
+        "output": ".pio\\build\\Default\\lib161\\RTClib\\RTC_Millis.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\lib161\\RTClib\\RTC_PCF8523.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -I.pio\\libdeps\\Default\\RTClib\\src \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs .pio\\libdeps\\Default\\RTClib\\src\\RTC_PCF8523.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": ".pio\\libdeps\\Default\\RTClib\\src\\RTC_PCF8523.cpp",
+        "output": ".pio\\build\\Default\\lib161\\RTClib\\RTC_PCF8523.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\lib161\\RTClib\\RTC_PCF8563.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -I.pio\\libdeps\\Default\\RTClib\\src \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs .pio\\libdeps\\Default\\RTClib\\src\\RTC_PCF8563.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": ".pio\\libdeps\\Default\\RTClib\\src\\RTC_PCF8563.cpp",
+        "output": ".pio\\build\\Default\\lib161\\RTClib\\RTC_PCF8563.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\lib161\\RTClib\\RTClib.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -I.pio\\libdeps\\Default\\RTClib\\src \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs .pio\\libdeps\\Default\\RTClib\\src\\RTCLib.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": ".pio\\libdeps\\Default\\RTClib\\src\\RTCLib.cpp",
+        "output": ".pio\\build\\Default\\lib161\\RTClib\\RTClib.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\libce6\\TM1637\\TM1637Display.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -I.pio\\libdeps\\Default\\TM1637 -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs .pio\\libdeps\\Default\\TM1637\\TM1637Display.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": ".pio\\libdeps\\Default\\TM1637\\TM1637Display.cpp",
+        "output": ".pio\\build\\Default\\libce6\\TM1637\\TM1637Display.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\lib910\\eventmanager\\EventManager.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -Ilib\\eventmanager -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs lib\\eventmanager\\EventManager.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "lib\\eventmanager\\EventManager.cpp",
+        "output": ".pio\\build\\Default\\lib910\\eventmanager\\EventManager.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\src\\barometer\\barometer.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -Isrc -Ilib\\eventmanager -I.pio\\libdeps\\Default\\TM1637 -I.pio\\libdeps\\Default\\RTClib\\src \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -I.pio\\libdeps\\Default\\ArduinoJson\\src -I.pio\\libdeps\\Default\\LiquidCrystal_I2C -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs src\\barometer\\barometer.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "src\\barometer\\barometer.cpp",
+        "output": ".pio\\build\\Default\\src\\barometer\\barometer.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\src\\clock\\clock.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -Isrc -Ilib\\eventmanager -I.pio\\libdeps\\Default\\TM1637 -I.pio\\libdeps\\Default\\RTClib\\src \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -I.pio\\libdeps\\Default\\ArduinoJson\\src -I.pio\\libdeps\\Default\\LiquidCrystal_I2C -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs src\\clock\\clock.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "src\\clock\\clock.cpp",
+        "output": ".pio\\build\\Default\\src\\clock\\clock.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\src\\controls\\button.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -Isrc -Ilib\\eventmanager -I.pio\\libdeps\\Default\\TM1637 -I.pio\\libdeps\\Default\\RTClib\\src \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -I.pio\\libdeps\\Default\\ArduinoJson\\src -I.pio\\libdeps\\Default\\LiquidCrystal_I2C -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs src\\controls\\button.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "src\\controls\\button.cpp",
+        "output": ".pio\\build\\Default\\src\\controls\\button.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\src\\controls\\rotary.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -Isrc -Ilib\\eventmanager -I.pio\\libdeps\\Default\\TM1637 -I.pio\\libdeps\\Default\\RTClib\\src \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -I.pio\\libdeps\\Default\\ArduinoJson\\src -I.pio\\libdeps\\Default\\LiquidCrystal_I2C -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs src\\controls\\rotary.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "src\\controls\\rotary.cpp",
+        "output": ".pio\\build\\Default\\src\\controls\\rotary.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\src\\func.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -Isrc -Ilib\\eventmanager -I.pio\\libdeps\\Default\\TM1637 -I.pio\\libdeps\\Default\\RTClib\\src \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -I.pio\\libdeps\\Default\\ArduinoJson\\src -I.pio\\libdeps\\Default\\LiquidCrystal_I2C -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs src\\func.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "src\\func.cpp",
+        "output": ".pio\\build\\Default\\src\\func.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\src\\main.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -Isrc -Ilib\\eventmanager -I.pio\\libdeps\\Default\\TM1637 -I.pio\\libdeps\\Default\\RTClib\\src \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -I.pio\\libdeps\\Default\\ArduinoJson\\src -I.pio\\libdeps\\Default\\LiquidCrystal_I2C -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs src\\main.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "src\\main.cpp",
+        "output": ".pio\\build\\Default\\src\\main.cpp.o"
+    },
+    {
+        "command": "C:\\Users\\gjkaa\\.platformio\\packages\\toolchain-atmelavr\\bin\\avr-g++.exe -o .pio\\build\\Default\\src\\morse.cpp.o -c -fno-exceptions -fno-threadsafe-statics -fpermissive -std=gnu++11 -mmcu=atmega328p -Os -Wall -ffunction-sections -fdata-sections -flto -DPLATFORMIO=60118 -DARDUINO_AVR_NANO -DF_CPU=16000000L -DARDUINO_ARCH_AVR -DARDUINO=10808 -Isrc -Ilib\\eventmanager -I.pio\\libdeps\\Default\\TM1637 -I.pio\\libdeps\\Default\\RTClib\\src \"-I.pio\\libdeps\\Default\\Adafruit BusIO\" -I.pio\\libdeps\\Default\\ArduinoJson\\src -I.pio\\libdeps\\Default\\LiquidCrystal_I2C -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\Wire\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\libraries\\SPI\\src -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\cores\\arduino -IC:\\Users\\gjkaa\\.platformio\\packages\\framework-arduino-avr\\variants\\eightanaloginputs src\\morse.cpp",
+        "directory": "C:\\git\\n2-arduino",
+        "file": "src\\morse.cpp",
+        "output": ".pio\\build\\Default\\src\\morse.cpp.o"
+    }
+]

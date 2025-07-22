@@ -2,13 +2,12 @@
 #include <string.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
-#include <TM1637Display.h>
 #include <EventManager.h>
-#include "barometer/barometer.h"
-#include "clock/clock.h"
-#include "RTCLib.h"
-#include "func.h"
-#include "controls/controls.h"
+#include <barometer.h>
+#include <clock.h>
+#include <RTCLib.h>
+#include <func.h>
+#include <controls.h>
 
 // Temperature
 // https://microcontrollerslab.com/max6675-thermocouple-arduino-tutorial/
@@ -21,7 +20,8 @@ void raiseEvents();
 // define display functions
 void displayInit();
 void displayText(int row, String text);
-void displayTextToScreen(int screen, int row, String text);
+void displayTextToScreen(int screen, int row, const char* text);
+void displayTextToScreen(int screen, int row, const __FlashStringHelper* text);
 void switchToScreen(int screen);
 void refreshCurrentScreen();
 void clearScreen(int screen);
@@ -53,24 +53,22 @@ Controls::ButtonControl selectButton(PIND4);
 // A, B, button
 Controls::RotaryEncoder rotary(PIND7, PIND6, PIND5);
 
-#define DM_CLK 7
-#define DM_DIO 6
-
-#define DALT_CLK 7
-#define DALT_DIO 6
-
-// TM1637Display ledDisplay(DM_CLK, DM_DIO);
-
 // ========================================
 // VIRTUAL SCREEN SYSTEM
 // ========================================
-#define MAX_SCREENS 16
+#define MAX_SCREENS 5  
 #define SCREEN_ROWS 2
 #define SCREEN_COLS 16
 
-// Virtual screen storage - stores text for all 16 screens
-String virtualScreens[MAX_SCREENS][SCREEN_ROWS];
-int currentScreen = 0;  // Currently displayed screen (0-15)
+#define SCR_SENSORS 0
+#define SCR_CLOCK 1
+#define SCR_SETTINGS 2
+#define SCR_ENGINE 3
+#define SCR_DEBUG 4
+
+// Virtual screen storage - using char arrays instead of String objects
+char virtualScreens[MAX_SCREENS][SCREEN_ROWS][SCREEN_COLS + 1];  // +1 for null terminator
+int currentScreen = 0;  // Currently displayed screen (0-7)
 bool screenNeedsUpdate = false;  // Flag to indicate screen refresh needed
 
 // local memory
@@ -84,6 +82,8 @@ int currentRotaryValue = 0; // Current value of the rotary encoder
 // ========================================
 void setup() {
   Serial.begin(9600);
+
+  Serial.println(F("N2 Arduino Setup"));
 
   Wire.begin();
   clock.Begin();
@@ -106,19 +106,19 @@ void setup() {
   keypadInit();
 
   if(!barometer.begin()){
-    Serial.println(PSTR("BMP085 not found, check connections!"));
+    Serial.println(F("BMP085 not found, check connections!"));
   }
   else
   {
-    Serial.println(PSTR("BMP085 found"));
+    Serial.println(F("BMP085 found"));
   }
 
     if(!clock.RtcFound){
-    Serial.println(PSTR("RTC not found, check connections/battery"));
+    Serial.println(F("RTC not found, check connections/battery"));
   }
   else
   {
-    Serial.println(PSTR("RTC found"));
+    Serial.println(F("RTC found"));
     
     // Example usage of new date/time configuration functions:
     // clock.SetDateTimeComponent(Clock::YEAR_2DIGIT, 24);  // Set year to 2024
@@ -190,34 +190,37 @@ void raiseEvents()
 
 void initializeEventHandlers()
 {
+  // The event manager uses a stack with a fixed size for event listeners and event queues.
+  // Adjust the sizes in EventManager.h if needed, but keep them reasonable to avoid memory issues
+
   // Register barometer event handler
   if(!clock.eventManager.addListener( EventManager::EventType::kEventTimer0, readBarometer ))
   {
-    Serial.println(PSTR("Failed to add readBarometer listener"));
+    Serial.println(F("Failed to add readBarometer"));
   }
  
   // Register clock time event handler
   if(!clock.eventManager.addListener( EventManager::EventType::kEventTimer0, handleClockTimeEvent ))
   {
-      Serial.println(PSTR("Failed to add handleTimeEvent listener"));
+      Serial.println(F("Failed to add handleTimeEvent"));
   }  
 
   // Register push button event handler
   if(!selectButton.eventManager.addListener( EventManager::EventType::kEventKeyRelease, handleButtonReleaseEvent ))
   {
-      Serial.println(PSTR("Failed to add handleButtonReleaseEvent listener"));
+      Serial.println(F("Failed to add handleButtonReleaseEvent"));
   }  
 
   // Register rotary encoder button event handler
   if(!rotary.eventManager.addListener( EventManager::EventType::kEventKeyRelease, handleButtonReleaseEvent ))
   {
-      Serial.println(PSTR("Failed to add handleButtonReleaseEvent listener"));
+      Serial.println(F("Failed to add handleButtonReleaseEvent"));
   }  
 
   // Register rotary encoder rotation event handler
   if(!rotary.eventManager.addListener( EventManager::EventType::kEventMenu0, handleRotaryEvent ))
   {
-      Serial.println(PSTR("Failed to add handleRotaryEvent listener"));
+      Serial.println(F("Failed to add handleRotaryEvent"));
   }  
 }
 
@@ -230,16 +233,19 @@ void readBarometer(int event, int param){
   if(! barometer.active()) return;
   barometer.readAltitude();
 
-  Serial.println("Pressure: " + String(barometer.currentPressure()) + "Hpa");
+  // Use Serial.print to avoid String concatenation
+  Serial.print("Pressure: ");
+  Serial.print(barometer.currentPressure());
+  Serial.println("Hpa");
 
   float t = barometer.currentTemperature();
   float alt = barometer.currentAltitude();
   float altft = alt * 3.28084;
   
-  // Display barometer data on screen 0 (default sensor screen)
-  displayTextToScreen(0, 0, 
-    "" + left_pad(String(t,0),3,' ') + "C" +
-    " " + left_pad(String(altft,0),4,' ') + "ft");
+  // Display barometer data on screen 0 (default sensor screen) using sprintf
+  char sensorBuffer[17];
+  sprintf(sensorBuffer, "%3dC %4dft     ", (int)t, (int)altft);
+  displayTextToScreen(SCR_SENSORS, 0, sensorBuffer);
 }
 
 // Clock Time Event Handler - displays current time on LCD
@@ -255,12 +261,11 @@ void handleClockTimeEvent(int event, int param)
 //    ledDisplay.showNumberDecEx(hm, 0b01000000, true);
 
   // Display time on screen 0 (default sensor screen)
-  displayTextToScreen(0, 1, 
-    "" 
-    + left_pad(String(clock.hour), 2, '0') 
-    + ":" + left_pad(String(clock.minute), 2, '0') 
-    + ":" + left_pad(String(clock.second), 2, '0') 
-    );
+  char timeBuffer[17];
+  sprintf(timeBuffer, "%02d:%02d:%02d       ", clock.hour, clock.minute, clock.second);
+
+  displayTextToScreen(SCR_SENSORS, 1, timeBuffer);
+  displayTextToScreen(SCR_CLOCK, 1, timeBuffer);
 }
 
 // ========================================
@@ -270,14 +275,16 @@ void handleClockTimeEvent(int event, int param)
 // Main button event dispatcher
 void handleButtonReleaseEvent(int event, int param)
 {
-  Serial.println(PSTR("BtnRelease:") + String(param));
+  Serial.print("BtnRelease:");
+  Serial.println(param);
   
   if(param == PIND6) {
     handleSelectButtonRelease(event, param);
   } else if(param == PIND5) {
     handleRotaryButtonRelease(event, param);
   } else {
-    Serial.println(PSTR("UnknownBtn:") + String(param));
+    Serial.print("UnknownBtn:");
+    Serial.println(param);
   }
 }
 
@@ -289,20 +296,20 @@ void handleSelectButtonRelease(int event, int param)
   if(commandMode) {
     // In command mode, select button performs screen-specific actions
     switch(currentScreen) {
-      case 0:
-        displayTextToScreen(0, 1, "Sensor Reset    ");
+      case SCR_SENSORS:
+        displayTextToScreen(SCR_SENSORS, 1, F("Sensor Reset    "));
         break;
-      case 1:
-        displayTextToScreen(1, 1, "Menu 1 Selected ");
+      case SCR_CLOCK:
+        displayTextToScreen(SCR_CLOCK, 1, F("Menu 1 Selected "));
         break;
-      case 2:
-        displayTextToScreen(2, 1, "Menu 2 Selected ");
+      case SCR_SETTINGS:
+        displayTextToScreen(SCR_SETTINGS, 1, F("Settings Mode   "));
         break;
-      case 3:
-        displayTextToScreen(3, 1, "Settings Mode   ");
+      case SCR_DEBUG:
+        displayTextToScreen(SCR_DEBUG, 1, F("Debug mode      "));
         break;
       default:
-        displayTextToScreen(currentScreen, 1, "Screen " + String(currentScreen) + " Action");
+        displayTextToScreen(currentScreen, 1, F("Screen Action   "));
         break;
     }
   } else {
@@ -310,10 +317,13 @@ void handleSelectButtonRelease(int event, int param)
     ToggleBacklight();
     
     // Update status on all screens to show backlight state
-    String backlightStatus = lcdBacklightEnabled ? "Light: ON       " : "Light: OFF      ";
     for(int i = 1; i < MAX_SCREENS; i++) {
       if(i != currentScreen) {  // Don't overwrite current screen content
-        displayTextToScreen(i, 1, backlightStatus);
+        if(lcdBacklightEnabled) {
+          displayTextToScreen(i, 1, F("Light: ON       "));
+        } else {
+          displayTextToScreen(i, 1, F("Light: OFF      "));
+        }
       }
     }
   }
@@ -325,25 +335,27 @@ void handleRotaryButtonRelease(int event, int param)
   ToggleCommandMode();
 
   // Display command mode status on current screen
-  String modeStatus = commandMode ? "CMD Mode: ON    " : "CMD Mode: OFF   ";
-  
-  // Show mode status on the bottom row temporarily
-  displayTextToScreen(currentScreen, 1, modeStatus);
+  if(commandMode) {
+    displayTextToScreen(currentScreen, 1, F("CMD Mode: ON    "));
+  } else {
+    displayTextToScreen(currentScreen, 1, F("CMD Mode: OFF   "));
+  }
   
   // Also populate some example content on different screens
   if(commandMode) {
-    displayTextToScreen(4, 0, "Clock Settings  ");
-    displayTextToScreen(4, 1, "Set Date/Time   ");
-    
-    displayTextToScreen(5, 0, "Display Config  ");
-    displayTextToScreen(5, 1, "Brightness/etc  ");
-    
-    displayTextToScreen(6, 0, "Sensor Config   ");
-    displayTextToScreen(6, 1, "Calibration     ");
+    displayTextToScreen(SCR_SETTINGS, 0, F("Clock Settings  "));
+    displayTextToScreen(SCR_SETTINGS, 1, F("Set Date/Time   "));
+
+    displayTextToScreen(SCR_DEBUG, 0, F("Display Config  "));
+    displayTextToScreen(SCR_DEBUG, 1, F("Brightness/etc  "));
   }
 
-  Serial.println(PSTR("Rotary button action - current rotary value: ") + String(rotary.RotaryValue()));
-  Serial.println(PSTR("Current screen: ") + String(currentScreen) + PSTR(", Command mode: ") + String(commandMode));
+  Serial.print("Rotary button action - current rotary value: ");
+  Serial.println(rotary.RotaryValue());
+  Serial.print("Current screen: ");
+  Serial.print(currentScreen);
+  Serial.print(", Command mode: ");
+  Serial.println(commandMode);
 }
 
 // Rotary Encoder Rotation Handler - handles rotary encoder turns
@@ -411,15 +423,15 @@ void displayInit()
   // Initialize all virtual screens to empty
   clearAllScreens();
   
-  // Set up default screens with labels
-  displayTextToScreen(0, 0, "Sensors         ");
-  displayTextToScreen(1, 0, "Menu 1          ");
-  displayTextToScreen(1, 1, "                ");
-  displayTextToScreen(2, 0, "Menu 2          ");
-  displayTextToScreen(2, 1, "                ");
-  displayTextToScreen(3, 0, "Settings        ");
-  displayTextToScreen(3, 1, "                ");
-  
+  // Set up default screens with labels using PROGMEM strings
+  displayTextToScreen(SCR_SENSORS, 0, F("Sensors         "));
+  displayTextToScreen(SCR_CLOCK, 0, F("Clock           "));
+  displayTextToScreen(SCR_CLOCK, 1, F("                "));
+  displayTextToScreen(SCR_SETTINGS, 0, F("Settings        "));
+  displayTextToScreen(SCR_SETTINGS, 1, F("                "));
+  displayTextToScreen(SCR_DEBUG, 0, F("Debug           "));
+  displayTextToScreen(SCR_DEBUG, 1, F("                "));
+
   // Start on screen 0
   switchToScreen(0);
 }
@@ -429,42 +441,76 @@ void displayInit()
  * @param row Row number (0-1)
  * @param text Text to display (max 16 characters)
  */
-void displayText(int row, String text)
+void displayText(int row, char const* text)
 {
   displayTextToScreen(currentScreen, row, text);
 }
 
 /**
- * @brief Write text to a specific virtual screen
- * @param screen Screen number (0-15)
+ * @brief Write text to a specific virtual screen (PROGMEM version)
+ * @param screen Screen number (0-3)
  * @param row Row number (0-1)
- * @param text Text to display (max 16 characters)
+ * @param text Text to display from PROGMEM (max 16 characters)
  */
-void displayTextToScreen(int screen, int row, String text)
+void displayTextToScreen(int screen, int row, const __FlashStringHelper* text)
 {
   // Validate parameters
   if(screen < 0 || screen >= MAX_SCREENS) return;
   if(row < 0 || row >= SCREEN_ROWS) return;
   
-  // Pad or truncate text to exactly 16 characters
-  String paddedText = text;
-  while(paddedText.length() < SCREEN_COLS) {
-    paddedText += " ";
-  }
-  if(paddedText.length() > SCREEN_COLS) {
-    paddedText = paddedText.substring(0, SCREEN_COLS);
-  }
+  // Copy from PROGMEM to RAM buffer
+  strcpy_P(virtualScreens[screen][row], (PGM_P)text);
   
-  // Store text in virtual screen buffer
-  virtualScreens[screen][row] = paddedText;
+  // Pad with spaces if needed
+  int len = strlen(virtualScreens[screen][row]);
+  for(int i = len; i < SCREEN_COLS; i++) {
+    virtualScreens[screen][row][i] = ' ';
+  }
+  virtualScreens[screen][row][SCREEN_COLS] = '\0';  // Null terminate
   
   // If this is the currently visible screen, update the LCD immediately
   if(screen == currentScreen) {
     lcd.setCursor(0, row);
-    lcd.print(paddedText);
+    lcd.print(virtualScreens[screen][row]);
+  }
+}
+
+/**
+ * @brief Write text to a specific virtual screen
+ * @param screen Screen number (0-3)
+ * @param row Row number (0-1)
+ * @param text Text to display (max 16 characters)
+ */
+void displayTextToScreen(int screen, int row, char const* text)
+{
+  // Validate parameters
+  if(screen < 0 || screen >= MAX_SCREENS) return;
+  if(row < 0 || row >= SCREEN_ROWS) return;
+  
+  // Copy text and pad with spaces if needed
+  strcpy(virtualScreens[screen][row], text);
+  virtualScreens[screen][row][SCREEN_COLS] = '\0';  // Ensure null termination
+  
+  // Pad with spaces if needed
+  int len = strlen(virtualScreens[screen][row]);
+  for(int i = len; i < SCREEN_COLS; i++) {
+    virtualScreens[screen][row][i] = ' ';
+  }
+  virtualScreens[screen][row][SCREEN_COLS] = '\0';  // Null terminate
+  
+  // If this is the currently visible screen, update the LCD immediately
+  if(screen == currentScreen) {
+    lcd.setCursor(0, row);
+    lcd.print(virtualScreens[screen][row]);
   }
   
-  Serial.println("Screen " + String(screen) + " Row " + String(row) + ": " + paddedText);
+  // Simplified Serial output without String concatenation
+  Serial.print("Screen ");
+  Serial.print(screen);
+  Serial.print(" Row ");
+  Serial.print(row);
+  Serial.print(": ");
+  Serial.println(virtualScreens[screen][row]);
 }
 
 /**
@@ -477,8 +523,9 @@ void switchToScreen(int screen)
   
   currentScreen = screen;
   refreshCurrentScreen();
-  
-  Serial.println(PSTR("Screen: ") + String(currentScreen));
+
+  Serial.print(F("Screen: "));
+  Serial.println(currentScreen);
 }
 
 /**
@@ -499,14 +546,14 @@ void refreshCurrentScreen()
 
 /**
  * @brief Clear a specific virtual screen
- * @param screen Screen number to clear (0-15)
+ * @param screen Screen number to clear (0-7)
  */
 void clearScreen(int screen)
 {
   if(screen < 0 || screen >= MAX_SCREENS) return;
   
   for(int row = 0; row < SCREEN_ROWS; row++) {
-    virtualScreens[screen][row] = "                "; // 16 spaces
+    strcpy(virtualScreens[screen][row], "                "); // 16 spaces
   }
   
   // If this is the currently visible screen, refresh the display
@@ -522,7 +569,7 @@ void clearAllScreens()
 {
   for(int screen = 0; screen < MAX_SCREENS; screen++) {
     for(int row = 0; row < SCREEN_ROWS; row++) {
-      virtualScreens[screen][row] = "                "; // 16 spaces
+      strcpy(virtualScreens[screen][row], "                "); // 16 spaces
     }
   }
   

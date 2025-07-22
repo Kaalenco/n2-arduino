@@ -37,7 +37,7 @@ namespace Barometer {
     // so ...Temperature(...) must be called before ...Pressure(...).
     long b5; 
 
-    short tempature;
+    short temperature;
     long pressure;
     float altitude;
     bool _active = false;

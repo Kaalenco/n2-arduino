@@ -22,9 +22,9 @@ namespace Clock {
             bool RtcFound=0;
             DateTime currentTime;
             EventManager eventManager;
-            int hour = 0;
-            int minute = 0;
-            int second = 0;
+            byte hour = 0;
+            byte minute = 0;
+            byte second = 0;
             long hms = 0;
 
             RtcClock();
@@ -44,16 +44,16 @@ namespace Clock {
             unsigned long lastTimerEvent = 0;
             
             // Configuration storage
-            int configYear = 24;    // 2-digit year (default: 2024)
-            int configMonth = 1;    // Month (1-12)
-            int configDay = 1;      // Day (1-31)
-            int configHour = 0;     // Hour (0-23)
-            int configMinute = 0;   // Minute (0-59)
-            int configSecond = 0;   // Second (0-59)
+            byte configYear = 24;    // 2-digit year (default: 2024)
+            byte configMonth = 1;    // Month (1-12)
+            byte configDay = 1;      // Day (1-31)
+            byte configHour = 0;     // Hour (0-23)
+            byte configMinute = 0;   // Minute (0-59)
+            byte configSecond = 0;   // Second (0-59)
             
             // Helper functions
-            int ClampValue(int value, int min, int max);
-            int GetDaysInMonth(int year, int month);
+            byte ClampValue(byte value, byte min, byte max);
+            byte GetDaysInMonth(byte year, byte month);
             void ApplyConfiguration();
     };
 }

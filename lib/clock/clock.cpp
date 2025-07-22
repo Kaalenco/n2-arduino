@@ -19,7 +19,7 @@ namespace Clock {
         }
 
         if (! RTC.initialized() || RTC.lostPower()) {
-            Serial.println("RTC is NOT initialized, set the time!");
+            Serial.println(PSTR("RTC NOT initialized, set the time!"));
             // When time needs to be set on a new device, or after a power loss, the
             // following line sets the RTC to the date & time this sketch was compiled
             RTC.adjust(DateTime(F(__DATE__), F(__TIME__)));
@@ -66,7 +66,7 @@ namespace Clock {
             // Serial.println("Timer event");
             lastTimerEvent = currentMillis;
             if(!eventManager.queueEvent(EventManager::EventType::kEventTimer0, 0)){
-                Serial.println("Failed to queue timer event");            
+                Serial.println(PSTR("Failed to queue timer event"));            
             };
         }
     }
@@ -101,8 +101,8 @@ namespace Clock {
         
         // Apply the new configuration to the RTC
         ApplyConfiguration();
-        
-        Serial.println("DateTime updated: " + GetFormattedDateTime());
+
+        Serial.println(PSTR("DateTime updated: ") + GetFormattedDateTime());
     }
 
     String RtcClock::GetFormattedDateTime() {
@@ -143,13 +143,13 @@ namespace Clock {
     // HELPER FUNCTIONS
     // ========================================
 
-    int RtcClock::ClampValue(int value, int min, int max) {
+    byte RtcClock::ClampValue(byte value, byte min, byte max) {
         if(value < min) return min;
         if(value > max) return max;
         return value;
     }
 
-    int RtcClock::GetDaysInMonth(int year, int month) {
+    byte RtcClock::GetDaysInMonth(byte year, byte month) {
         switch(month) {
             case 1: case 3: case 5: case 7: case 8: case 10: case 12:
                 return 31;
