@@ -2,15 +2,17 @@
 #include <EMSMemoryMap.h>
 #include <PinsMap.h>
 #include <TemperatureManager.h>
+#include <OilPressureManager.h>
 #include <SerialLogger.h>
 #include <EngineDataLogger.h>
 #include <EepromConfigure.h>
+#include "processCanbus.h"
 
 // Create logger instance for debugging output
 SerialLogger logger(9600, true);  // 9600 baud, verbose mode
 
 // Create CAN bus logger for engine data
-CanbusLogging::EngineDataLogger canLogger(PIN_CANBUS);
+CanbusLogging::EngineDataLogger canLogger(PIN_SPI_CS);
 
 // EEPROM configuration handler (initialized in setup after CAN bus is ready)
 EepromConfig::EepromConfigure* eepromConfig = nullptr;
@@ -32,10 +34,10 @@ void setup() {
   uint8_t sensorsInitialized = TemperatureManager::initialize();
 
   logger.logMessage(F("Temperature sensor initialization:"));
-  Serial.print(F("  Sensors configured: "));
-  Serial.println(TemperatureManager::getSensorCount());
-  Serial.print(F("  Sensors initialized: "));
-  Serial.println(sensorsInitialized);
+  logger.logPrint(F("  Sensors configured: "));
+  logger.logPrintln(TemperatureManager::getSensorCount());
+  logger.logPrint(F("  Sensors initialized: "));
+  logger.logPrintln(sensorsInitialized);
 
   // List configured sensors
   logger.logMessage(F(""));
@@ -43,21 +45,33 @@ void setup() {
   for (uint8_t i = 0; i < TemperatureManager::getSensorCount(); i++) {
     const TemperatureManager::SensorConfig* config = TemperatureManager::getSensorConfig(i);
     if (config != nullptr) {
-      Serial.print(F("  [0x"));
-      if (config->sensorId < 0x10) Serial.print('0');
-      Serial.print(config->sensorId, HEX);
-      Serial.print(F("] "));
-      Serial.print(config->name);
-      Serial.print(F(" (CS: D"));
-      Serial.print(config->chipSelectPin);
-      Serial.print(F(", Offset: "));
-      Serial.print(config->temperatureOffset, 1);
-      Serial.println(F("°C)"));
+      logger.logPrint(F("  [0x"));
+      if (config->sensorId < 0x10) logger.logPrint('0');
+      logger.logPrint(config->sensorId, HEX);
+      logger.logPrint(F("] "));
+      logger.logPrint(config->name);
+      logger.logPrint(F(" (CS: D"));
+      logger.logPrint(config->chipSelectPin);
+      logger.logPrint(F(", Offset: "));
+      logger.logPrint(config->temperatureOffset, 1);
+      logger.logPrintln(F("°C)"));
     }
   }
 
   logger.logMessage(F(""));
   logger.logMessage(F("Ready for temperature monitoring..."));
+  logger.logMessage(F(""));
+
+  // Initialize oil pressure sensor
+  logger.logMessage(F("Initializing oil pressure sensor..."));
+  if (OilPressureManager::initialize()) {
+    logger.logMessage(F("Oil pressure sensor initialized successfully"));
+  } else {
+    logger.logMessage(F("Oil pressure sensor initialization FAILED"));
+    logger.logMessage(F("  error status: "));
+    logger.logPrintln(OilPressureSensor::getStatus());
+    logger.logMessage(F(""));
+  }
   logger.logMessage(F(""));
 
   // Initialize CAN bus logger
@@ -77,29 +91,18 @@ void setup() {
 
 void loop() {
   // Process incoming CAN messages for EEPROM configuration
-  if (eepromConfig != nullptr && canLogger.isReady()) {
-    // Check for incoming CAN messages
-    while (canLogger.getCan().checkReceive() == CAN_MSGAVAIL) {
-      uint32_t rxId;
-      uint8_t len;
-      uint8_t rxBuf[8];
-
-      canLogger.getCan().readMsgBuf(&rxId, &len, rxBuf);
-
-      // Process configuration messages
-      if (eepromConfig->processMessage(rxId, len, rxBuf)) {
-        // Message was a configuration message and was processed
-        Serial.print(F("Config msg processed: 0x"));
-        Serial.println(rxId, HEX);
-      }
-    }
-  }
+  processCanMessages(canLogger, eepromConfig);
 
   // Create array to hold sensor readings
-  TemperatureManager::SensorReading readings[TemperatureManager::MAX_TEMP_SENSORS];
+  Common::SensorReading readings[TemperatureManager::MAX_TEMP_SENSORS];
 
   // Read all temperature sensors
-  uint8_t readCount = TemperatureManager::readAll(readings, TemperatureManager::MAX_TEMP_SENSORS);
+  uint8_t readCount = 0;
+  readCount = TemperatureManager::readAll(readings, readCount, TemperatureManager::MAX_TEMP_SENSORS);
+
+  // Read oil pressure sensor
+  OilPressureManager::read(readings, readCount);
+  readCount++;
 
   // Log readings to serial terminal
   logger.beginFrame();
@@ -114,23 +117,25 @@ void loop() {
 
     switch (readings[i].id) {
       case SENSOR_TEMPERATURE_EGT_1:
-        canLogger.setEGT1(readings[i].celsius, readings[i].celsius > DEFAULT_EGT_WARNING);
+        canLogger.setEGT1(readings[i].value, readings[i].warning );
         break;
       case SENSOR_TEMPERATURE_CHT_1:
-        canLogger.setCHT1(readings[i].celsius, readings[i].celsius > DEFAULT_CHT_WARNING);
+        canLogger.setCHT1(readings[i].value, readings[i].warning );
         break;
       case SENSOR_TEMPERATURE_AMB:
-        canLogger.setEngineAmbient(readings[i].celsius, false);
+        canLogger.setEngineAmbient(readings[i].value, false);
         break;
-      // Note: Oil temperature sensor would need to be added to TemperatureManager
-      // canLogger.setOilTemp(oilTemp, oilTemp > DEFAULT_OIL_TEMP_WARNING);
+      case SENSOR_TEMPERATURE_OIL:
+        canLogger.setOilTemp(readings[i].value, readings[i].warning);
+        break;
+      case SENSOR_PRESSURE_OIL:
+        canLogger.setOilPressure(readings[i].value, readings[i].warning);
+        break;
+      default:
+        // Unknown sensor ID - ignore
+        break;
     }
   }
-
-  // TODO: Read oil pressure from analog pin
-  // int oilPressureRaw = analogRead(PIN_ANALOG_OIL_PRESSURE);
-  // uint8_t oilPressureBar = mapOilPressure(oilPressureRaw);
-  // canLogger.setOilPressure(oilPressureBar, oilPressureBar < MIN_OIL_PRESSURE);
 
   // Send CAN frame
   if (canLogger.isReady()) {
