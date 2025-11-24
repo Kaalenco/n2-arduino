@@ -15,7 +15,6 @@
 
 #include <Arduino.h>
 #include <DataLogger.h>
-#include <TemperatureManager.h>
 
 class SerialLogger : public DataLogger {
 private:
@@ -67,17 +66,17 @@ public:
         if (!isReady()) return;
 
         Serial.println();
-        Serial.println(F("--- Temperature Readings ---"));
+        Serial.println(F("--- Sensor Readings ---"));
     }
 
     /**
      * Log a single sensor reading
      */
-    void logReading(const TemperatureManager::SensorReading& reading) override {
+    void logReading(const Common::SensorReading& reading) override {
         if (!isReady()) return;
 
         // Get sensor name
-        const char* sensorName = TemperatureManager::getSensorName(reading.id);
+        const char* sensorName = Common::getSensorName(reading.id);
 
         if (verbose) {
             // Verbose format with sensor ID
@@ -99,10 +98,10 @@ public:
 
         if (reading.success) {
             // Format temperature with sign
-            if (reading.celsius >= 0) {
+            if (reading.value >= 0) {
                 Serial.print(' ');  // Extra space for alignment with negative values
             }
-            Serial.print(reading.celsius);
+            Serial.print(reading.value);
             Serial.print(F("°C"));
 
             if (verbose) {
@@ -162,6 +161,56 @@ public:
     void logMessage(const __FlashStringHelper* message) {
         if (isReady()) {
             Serial.println(message);
+        }
+    }
+
+    // Print methods that mirror Serial.print behavior (without newline)
+
+    template<typename T>
+    void logPrint(T value) {
+        if (isReady()) {
+            Serial.print(value);
+        }
+    }
+
+    template<typename T>
+    void logPrint(T value, int format) {
+        if (isReady()) {
+            Serial.print(value, format);
+        }
+    }
+
+    void logPrint(const __FlashStringHelper* message) {
+        if (isReady()) {
+            Serial.print(message);
+        }
+    }
+
+    // Println methods (with newline)
+
+    template<typename T>
+    void logPrintln(T value) {
+        if (isReady()) {
+            Serial.println(value);
+        }
+    }
+
+    template<typename T>
+    void logPrintln(T value, int format) {
+        if (isReady()) {
+            Serial.println(value, format);
+        }
+    }
+
+    void logPrintln(const __FlashStringHelper* message) {
+        if (isReady()) {
+            Serial.println(message);
+        }
+    }
+
+    void logPrintln() {
+        if (isReady()) {
+            Serial.println();
         }
     }
 };

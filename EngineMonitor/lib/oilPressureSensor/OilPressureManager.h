@@ -10,6 +10,7 @@
 #include <EEPROM.h>
 #include "OilPressureSensor.h"
 #include "../systemConfig/EMSMemoryMap.h"
+#include "../common/SensorReading.h"
 #include <SensorTypes.h>
 
 namespace OilPressureManager {
@@ -20,15 +21,14 @@ namespace OilPressureManager {
 
 /**
  * Structure to hold oil pressure sensor reading result
+ * Extends Common::SensorReading with pressure-specific fields
+ *
+ * Field mappings:
+ *   value   = pressure in Bar * 10 (0-100 for 0-10 Bar)
+ *   warning = true if pressure is below warning threshold
  */
-struct SensorReading {
-    uint8_t id;                 // Sensor ID from SensorTypes.h
-    uint8_t pressureBarX10;     // Pressure in Bar * 10 (0-100 for 0-10 Bar)
-    float pressureBar;          // Pressure in Bar (float)
-    float pressurePsi;          // Pressure in PSI (float)
-    uint8_t status;             // Status code from OilPressureSensor
-    bool underPressure;         // True if pressure is below warning threshold
-    bool success;               // True if read was successful, false if error
+struct SensorReading : public Common::SensorReading {
+    // Inherits: id, value (pressureBarX10), status, warning (underPressure), success
 };
 
 // ========================================
@@ -95,11 +95,9 @@ static bool initialize() {
 
     // Initialize last reading
     Internal::lastReading.id = SENSOR_PRESSURE_OIL;
-    Internal::lastReading.pressureBarX10 = 0;
-    Internal::lastReading.pressureBar = 0.0;
-    Internal::lastReading.pressurePsi = 0.0;
-    Internal::lastReading.status = OilPressureSensor::STATUS_OK;
-    Internal::lastReading.underPressure = false;
+    Internal::lastReading.value = 0;
+    Internal::lastReading.status = OilPressureSensor::OIL_STATUS_OK;
+    Internal::lastReading.warning = false;
     Internal::lastReading.success = false;
 
     Internal::initialized = true;
@@ -112,34 +110,36 @@ static bool initialize() {
  * @param reading Pointer to SensorReading structure to store result
  * @return true if read was successful
  */
-static bool read(SensorReading* reading) {
+static uint8_t read(Common::SensorReading* readings, uint8_t index) {
+    Common::SensorReading* reading = &readings[index];
+    
     if (!Internal::initialized) {
         reading->id = SENSOR_PRESSURE_OIL;
-        reading->pressureBarX10 = 0;
-        reading->pressureBar = 0.0;
-        reading->pressurePsi = 0.0;
-        reading->status = OilPressureSensor::STATUS_NOT_INIT;
-        reading->underPressure = false;
+        reading->value = 0;
+        reading->status = OilPressureSensor::OIL_STATUS_NOT_INIT;
+        reading->warning = false;
         reading->success = false;
-        return false;
+        return index+1;
     }
 
     // Read from sensor (updates internal values)
-    float pressure = OilPressureSensor::readPressure();
+    OilPressureSensor::readPressure();
 
     // Populate reading structure
     reading->id = SENSOR_PRESSURE_OIL;
-    reading->pressureBar = OilPressureSensor::getAveragePressureBar();
-    reading->pressureBarX10 = OilPressureSensor::getAveragePressureX10();
-    reading->pressurePsi = OilPressureSensor::getAveragePressurePsi();
+    reading->value = OilPressureSensor::getAveragePressureX10();
     reading->status = OilPressureSensor::getStatus();
-    reading->underPressure = OilPressureSensor::isUnderPressure();
+    reading->warning = OilPressureSensor::isUnderPressure();
     reading->success = !OilPressureSensor::hasError();
 
-    // Store last reading
-    Internal::lastReading = *reading;
+    // Store last reading with extended fields
+    Internal::lastReading.id = reading->id;
+    Internal::lastReading.value = reading->value;
+    Internal::lastReading.status = reading->status;
+    Internal::lastReading.warning = reading->warning;
+    Internal::lastReading.success = reading->success;
 
-    return reading->success;
+    return index+1;
 }
 
 /**
@@ -149,26 +149,6 @@ static bool read(SensorReading* reading) {
  */
 static const SensorReading* getLastReading() {
     return &Internal::lastReading;
-}
-
-/**
- * Get the average pressure in Bar
- * Convenience function for quick access
- *
- * @return Average pressure in Bar
- */
-static float getAveragePressureBar() {
-    return OilPressureSensor::getAveragePressureBar();
-}
-
-/**
- * Get the average pressure in PSI
- * Convenience function for quick access
- *
- * @return Average pressure in PSI
- */
-static float getAveragePressurePsi() {
-    return OilPressureSensor::getAveragePressurePsi();
 }
 
 /**
@@ -215,22 +195,6 @@ static bool isInitialized() {
  */
 static bool hasError() {
     return OilPressureSensor::hasError();
-}
-
-/**
- * Get sensor name
- *
- * @return Sensor name string
- */
-static const char* getSensorName() {
-    return "OilPress";
-}
-
-/**
- * Print diagnostic information to Serial
- */
-static void printDiagnostics() {
-    OilPressureSensor::printDiagnostics();
 }
 
 /**

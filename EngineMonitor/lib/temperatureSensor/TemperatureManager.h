@@ -11,6 +11,7 @@
 #include "TemperatureSensor.h"
 #include "../systemConfig/PinsMap.h"
 #include "../systemConfig/EMSMemoryMap.h"
+#include "../common/SensorReading.h"
 #include <SensorTypes.h>
 
 namespace TemperatureManager {
@@ -21,13 +22,14 @@ namespace TemperatureManager {
 
 /**
  * Structure to hold temperature sensor reading result
+ * Extends Common::SensorReading with temperature-specific semantics
+ *
+ * Field mappings:
+ *   value   = temperature in whole degrees Celsius
+ *   warning = true if temperature exceeds over-temp warning threshold
  */
-struct SensorReading {
-    uint8_t id;           // Sensor ID from SensorTypes.h
-    int16_t celsius;      // Temperature in whole degrees Celsius
-    uint8_t status;        // Last status code from sensor
-    bool overTemperature; // True if temperature exceeds over-temp warning threshold
-    bool success;         // True if read was successful, false if error
+struct SensorReading : public Common::SensorReading {
+    // Inherits: id, value (celsius), status, warning (overTemperature), success
 };
 
 // Maximum number of temperature sensors in the system
@@ -137,8 +139,8 @@ static uint8_t initialize() {
  * @param maxReadings Maximum number of readings to store
  * @return Number of sensors read (successful or not)
  */
-static uint8_t readAll(SensorReading* readings, uint8_t maxReadings) {
-    uint8_t readCount = 0;
+static uint8_t readAll(Common::SensorReading* readings, uint8_t startIndex, uint8_t maxReadings) {
+    uint8_t readCount = startIndex;
 
     for (uint8_t i = 0; i < Internal::sensorCount && readCount < maxReadings; i++) {
         SensorConfig* config = &Internal::sensorConfigs[i];
@@ -152,8 +154,8 @@ static uint8_t readAll(SensorReading* readings, uint8_t maxReadings) {
         // Store result
         readings[readCount].id = config->sensorId;
         readings[readCount].status = status;
-        readings[readCount].celsius = (int16_t)round(temperature);
-        readings[readCount].overTemperature = overheated;
+        readings[readCount].value = (int16_t)round(temperature);
+        readings[readCount].warning = overheated;
         readings[readCount].success = !hasError && (temperature != TemperatureSensor::INVALID_TEMPERATURE);
 
         readCount++;
@@ -181,7 +183,7 @@ inline bool readSensor(uint8_t sensorId, SensorReading* reading) {
 
             // Store result
             reading->id = config->sensorId;
-            reading->celsius = (int16_t)round(temperature);
+            reading->value = (int16_t)round(temperature);
             reading->success = !hasError && (temperature != TemperatureSensor::INVALID_TEMPERATURE);
 
             return true;
@@ -211,21 +213,6 @@ static const SensorConfig* getSensorConfig(uint8_t index) {
         return nullptr;
     }
     return &Internal::sensorConfigs[index];
-}
-
-/**
- * Get sensor name by sensor ID
- *
- * @param sensorId Sensor ID from SensorTypes.h
- * @return Sensor name string, or "Unknown" if not found
- */
-static const char* getSensorName(uint8_t sensorId) {
-    for (uint8_t i = 0; i < Internal::sensorCount; i++) {
-        if (Internal::sensorConfigs[i].sensorId == sensorId) {
-            return Internal::sensorConfigs[i].name;
-        }
-    }
-    return "Unknown";
 }
 
 } // namespace TemperatureManager

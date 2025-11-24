@@ -6,7 +6,7 @@
 // Digital: D2-D7 (controls), D10-D13 (SPI sensors)
 // Analog: A0-A3 (analog sensors)
 // I2C: SDA/SCL (display, RTC, barometer)
-// SPI: MISO/MOSI/SCK (temperature sensors)
+// SPI: MISO/MOSI/SCK (CAN bus, temperature sensors)
 
 #ifndef EMS_PINS_MAP_H
 #define EMS_PINS_MAP_H
@@ -33,7 +33,7 @@
 #define thermoCLK               5      // Clock pin for MAX31855 (shared)
 #define thermoDO                6      // Data Out pin for MAX31855 (shared)
 
-#define PIN_CANBUS              8      // CS for CAN bus module (used in all systems)
+#define RESERVED                8      // Free digital pin for future use
 #define PIN_BUZZER              9      // Buzzer pin for audio alerts
 
 // Note: For systems with multiple CHT sensors (4-6 cylinders),

@@ -10,7 +10,7 @@
 #define DATA_LOGGER_H
 
 #include <Arduino.h>
-#include <TemperatureManager.h>
+#include "../common/SensorReading.h"
 
 /**
  * Abstract base class for data logging
@@ -29,7 +29,7 @@ public:
      *
      * @param reading Sensor reading to log
      */
-    virtual void logReading(const TemperatureManager::SensorReading& reading) = 0;
+    virtual void logReading(const Common::SensorReading& reading) = 0;
 
     /**
      * Log multiple sensor readings
@@ -37,7 +37,7 @@ public:
      * @param readings Array of sensor readings
      * @param count Number of readings in array
      */
-    virtual void logReadings(const TemperatureManager::SensorReading* readings, uint8_t count) {
+    virtual void logReadings(const Common::SensorReading* readings, uint8_t count) {
         // Default implementation: log each reading individually
         for (uint8_t i = 0; i < count; i++) {
             logReading(readings[i]);
