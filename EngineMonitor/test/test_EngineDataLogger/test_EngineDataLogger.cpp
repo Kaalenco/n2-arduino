@@ -5,11 +5,10 @@ using namespace CanbusLogging;
 
 // Test fixture
 EngineDataLogger* logger = nullptr;
-const uint8_t TEST_CS_PIN = 10;
 
 void setUp() {
     // Create a new logger for each test
-    logger = new EngineDataLogger(TEST_CS_PIN);
+    logger = new EngineDataLogger();
 }
 
 void tearDown() {

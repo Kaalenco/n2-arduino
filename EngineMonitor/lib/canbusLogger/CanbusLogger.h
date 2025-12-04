@@ -2,7 +2,7 @@
 #define CANBUS_LOGGER_H
 
 #include <Arduino.h>
-#include <mcp_can.h>
+#include <CanBusMCP2515.h>
 
 namespace CanbusLogging {
 
@@ -26,24 +26,20 @@ class CanbusLogger {
 public:
     /**
      * Constructor
-     * @param csPin Chip select pin for MCP2515
      */
-    CanbusLogger(uint8_t csPin) : _can(csPin), _csPin(csPin), _initialized(false) {}
+    CanbusLogger() : _initialized(false) {}
 
     /**
      * Initialize the CAN bus interface
-     * @param canSpeed CAN bus speed (e.g., CAN_500KBPS)
-     * @param clockSpeed MCP2515 clock speed (e.g., MCP_8MHZ)
+     * @param speed CAN bus speed (default: 500kbps)
+     * @param mode CAN bus mode (default: normal)
      * @return true if initialization successful
      */
-    virtual bool begin(uint8_t canSpeed = CAN_500KBPS, uint8_t clockSpeed = MCP_8MHZ) {
-        if (_can.begin(MCP_ANY, canSpeed, clockSpeed) == CAN_OK) {
-            _can.setMode(MCP_NORMAL);
-            _initialized = true;
-            return true;
-        }
-        _initialized = false;
-        return false;
+    virtual bool begin(CanBusInterface::Speed speed = CanBusInterface::SPEED_500KBPS,
+                      CanBusInterface::Mode mode = CanBusInterface::MODE_NORMAL) {
+        CanBusInterface::Result result = _can.begin(speed, mode);
+        _initialized = (result == CanBusInterface::OK);
+        return _initialized;
     }
 
     /**
@@ -55,11 +51,11 @@ public:
     }
 
     /**
-     * Get reference to the underlying MCP_CAN instance
+     * Get reference to the underlying CanBusMCP2515 instance
      * Allows sharing the CAN bus with other components
-     * @return Reference to MCP_CAN instance
+     * @return Reference to CanBusMCP2515 instance
      */
-    MCP_CAN& getCan() {
+    CanBusMCP2515& getCan() {
         return _can;
     }
 
@@ -79,8 +75,7 @@ public:
     virtual ~CanbusLogger() {}
 
 protected:
-    MCP_CAN _can;
-    uint8_t _csPin;
+    CanBusMCP2515 _can;
     bool _initialized;
 
     /**
@@ -91,7 +86,15 @@ protected:
      */
     bool sendMessage(uint16_t msgId, uint8_t* data) {
         if (!_initialized) return false;
-        return _can.sendMsgBuf(msgId, 0, 8, data) == CAN_OK;
+
+        CanBusInterface::Message msg;
+        msg.id = msgId;
+        msg.length = 8;
+        msg.extended = false;
+        msg.rtr = false;
+        memcpy(msg.data, data, 8);
+
+        return _can.sendMessage(msg) == CanBusInterface::OK;
     }
 
     /**

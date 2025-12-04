@@ -2,7 +2,7 @@
 #define CANBUS_RECEIVER_H
 
 #include <Arduino.h>
-#include <mcp_can.h>
+#include <CanBusMCP2515.h>
 #include <SensorTypes.h>
 #include <SensorReading.h>
 #include "EngineData1Decoder.h"
@@ -35,24 +35,20 @@ class CanbusReceiver {
 public:
     /**
      * Constructor
-     * @param csPin Chip select pin for MCP2515
      */
-    CanbusReceiver(uint8_t csPin) : _can(csPin), _csPin(csPin), _initialized(false) {}
+    CanbusReceiver() : _initialized(false), _lastAlerts(0) {}
 
     /**
      * Initialize the CAN bus interface
-     * @param canSpeed CAN bus speed (e.g., CAN_500KBPS)
-     * @param clockSpeed MCP2515 clock speed (e.g., MCP_8MHZ)
+     * @param speed CAN bus speed (default: 500kbps)
+     * @param mode CAN bus mode (default: normal)
      * @return true if initialization successful
      */
-    bool begin(uint8_t canSpeed = CAN_500KBPS, uint8_t clockSpeed = MCP_8MHZ) {
-        if (_can.begin(MCP_ANY, canSpeed, clockSpeed) == CAN_OK) {
-            _can.setMode(MCP_NORMAL);
-            _initialized = true;
-            return true;
-        }
-        _initialized = false;
-        return false;
+    bool begin(CanBusInterface::Speed speed = CanBusInterface::SPEED_500KBPS,
+               CanBusInterface::Mode mode = CanBusInterface::MODE_NORMAL) {
+        CanBusInterface::Result result = _can.begin(speed, mode);
+        _initialized = (result == CanBusInterface::OK);
+        return _initialized;
     }
 
     /**
@@ -69,7 +65,7 @@ public:
      */
     bool messageAvailable() {
         if (!_initialized) return false;
-        return _can.checkReceive() == CAN_MSGAVAIL;
+        return _can.messageAvailable();
     }
 
     /**
@@ -84,18 +80,17 @@ public:
         count = 0;
         if (!_initialized) return 0;
 
-        unsigned long msgId;
-        uint8_t len;
-        uint8_t buffer[8];
+        CanBusInterface::Message msg;
+        CanBusInterface::Result result = _can.receiveMessage(msg, 100);
 
-        if (_can.readMsgBuf(&msgId, &len, buffer) != CAN_OK) {
+        if (result != CanBusInterface::OK) {
             return 0;
         }
 
         // Decode based on message type
-        switch (msgId) {
+        switch (msg.id) {
             case ENGINE_DATA_1:
-                count = decodeEngineData1(buffer, readings, maxReadings);
+                count = decodeEngineData1(msg.data, readings, maxReadings);
                 return ENGINE_DATA_1;
 
             // Future message types can be added here
@@ -103,11 +98,11 @@ public:
             case FUEL_DATA:
             case ELECTRICAL_DATA:
                 // Not yet implemented
-                return (uint16_t)msgId;
+                return (uint16_t)msg.id;
 
             default:
                 // Unknown message type
-                return (uint16_t)msgId;
+                return (uint16_t)msg.id;
         }
     }
 
@@ -131,8 +126,7 @@ public:
     }
 
 private:
-    MCP_CAN _can;
-    uint8_t _csPin;
+    CanBusMCP2515 _can;
     bool _initialized;
     uint16_t _lastAlerts;
 

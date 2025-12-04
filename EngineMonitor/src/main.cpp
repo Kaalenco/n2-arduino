@@ -12,7 +12,7 @@
 SerialLogger logger(9600, true);  // 9600 baud, verbose mode
 
 // Create CAN bus logger for engine data
-CanbusLogging::EngineDataLogger canLogger(PIN_SPI_CS);
+CanbusLogging::EngineDataLogger canLogger;
 
 // EEPROM configuration handler (initialized in setup after CAN bus is ready)
 EepromConfig::EepromConfigure* eepromConfig = nullptr;
@@ -76,7 +76,7 @@ void setup() {
 
   // Initialize CAN bus logger
   logger.logMessage(F("Initializing CAN bus..."));
-  if (canLogger.begin(CAN_500KBPS, MCP_8MHZ)) {
+  if (canLogger.begin(CanBusInterface::SPEED_500KBPS, CanBusInterface::MODE_NORMAL)) {
     logger.logMessage(F("CAN bus initialized successfully"));
 
     // Initialize EEPROM configuration handler

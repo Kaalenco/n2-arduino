@@ -102,14 +102,14 @@
  *
  * Digital Pins:
  *   D0, D1:  Reserved for Serial (USB) - DO NOT USE
- *   D2:     MAX6675 CS - EGT temp
+ *   D2:     CAN bus INT (optional, for interrupt-driven CAN)
  *   D3:     MAX6675 CS - CHT1 temp (optional)
  *   D4:      MAX6675 SO (shared data out)
  *   D5:      MAX6675 CS - Ambient temp
  *   D6:      MAX6675 SCK (shared clock)
  *   D7:      MAX6675 CS - CHT3 temp
  *   D8:      CAN bus CS
- *   D9:      Buzzer for audio alerts
+ *   D9:      MAX6675 CS - EGT temp
  *   D10:     SPI CS 
  *   D11:     SPI MOSI (shared)
  *   D12:     SPI MISO (shared)

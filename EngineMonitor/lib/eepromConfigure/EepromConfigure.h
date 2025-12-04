@@ -14,7 +14,7 @@
 
 #include <Arduino.h>
 #include <EEPROM.h>
-#include <mcp_can.h>
+#include "CanBusInterface.h"
 
 namespace EepromConfig {
 
@@ -50,9 +50,9 @@ class EepromConfigure {
 public:
     /**
      * Constructor
-     * @param can Reference to initialized MCP_CAN instance
+     * @param can Reference to CanBusInterface implementation
      */
-    EepromConfigure(MCP_CAN& can) : _can(can), _initialized(false) {}
+    EepromConfigure(CanBusInterface& can) : _can(can), _initialized(false) {}
 
     /**
      * Initialize the EEPROM configurator
@@ -99,6 +99,15 @@ public:
             default:
                 return false;  // Not a configuration message
         }
+    }
+
+    /**
+     * Process incoming CAN message using CanBusInterface::Message
+     * @param msg CAN message
+     * @return true if processed
+     */
+    bool processMessage(const CanBusInterface::Message& msg) {
+        return processMessage(msg.id, msg.length, (uint8_t*)msg.data);
     }
 
     /**
@@ -171,15 +180,17 @@ public:
      * @return Result code
      */
     ConfigResult sendByteValue(uint16_t address, uint8_t value) {
-        uint8_t data[8] = {0};
-        data[0] = address & 0xFF;         // Address low byte
-        data[1] = (address >> 8) & 0xFF;  // Address high byte
-        data[2] = value;                   // Value
+        CanBusInterface::Message msg;
+        msg.id = CONFIGURE_BYTE_VALUE;
+        msg.length = 3;
+        msg.extended = false;
+        msg.rtr = false;
+        msg.data[0] = address & 0xFF;         // Address low byte
+        msg.data[1] = (address >> 8) & 0xFF;  // Address high byte
+        msg.data[2] = value;                   // Value
 
-        if (_can.sendMsgBuf(CONFIGURE_BYTE_VALUE, 0, 3, data) == CAN_OK) {
-            return CONFIG_OK;
-        }
-        return CONFIG_ERROR_SEND_FAILED;
+        CanBusInterface::Result result = _can.sendMessage(msg, 1000);
+        return (result == CanBusInterface::OK) ? CONFIG_OK : CONFIG_ERROR_SEND_FAILED;
     }
 
     /**
@@ -190,20 +201,22 @@ public:
      * @return Result code
      */
     ConfigResult sendWordValue(uint16_t address, uint16_t value) {
-        uint8_t data[8] = {0};
-        data[0] = address & 0xFF;         // Address low byte
-        data[1] = (address >> 8) & 0xFF;  // Address high byte
-        data[2] = value & 0xFF;           // Value low byte
-        data[3] = (value >> 8) & 0xFF;    // Value high byte
+        CanBusInterface::Message msg;
+        msg.id = CONFIGURE_WORD_VALUE;
+        msg.length = 4;
+        msg.extended = false;
+        msg.rtr = false;
+        msg.data[0] = address & 0xFF;         // Address low byte
+        msg.data[1] = (address >> 8) & 0xFF;  // Address high byte
+        msg.data[2] = value & 0xFF;           // Value low byte
+        msg.data[3] = (value >> 8) & 0xFF;    // Value high byte
 
-        if (_can.sendMsgBuf(CONFIGURE_WORD_VALUE, 0, 4, data) == CAN_OK) {
-            return CONFIG_OK;
-        }
-        return CONFIG_ERROR_SEND_FAILED;
+        CanBusInterface::Result result = _can.sendMessage(msg, 1000);
+        return (result == CanBusInterface::OK) ? CONFIG_OK : CONFIG_ERROR_SEND_FAILED;
     }
 
 private:
-    MCP_CAN& _can;
+    CanBusInterface& _can;
     bool _initialized;
 
     /**

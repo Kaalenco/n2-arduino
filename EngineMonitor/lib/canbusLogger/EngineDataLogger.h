@@ -15,9 +15,8 @@ class EngineDataLogger : public CanbusLogger {
 public:
     /**
      * Constructor
-     * @param csPin Chip select pin for MCP2515
      */
-    EngineDataLogger(uint8_t csPin) : CanbusLogger(csPin) {
+    EngineDataLogger() : CanbusLogger() {
         clearData();
     }
 
