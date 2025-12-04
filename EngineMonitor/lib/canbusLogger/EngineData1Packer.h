@@ -6,17 +6,17 @@
 namespace CanbusLogging {
 
 /**
- * Alert flags for ENGINE_DATA_1 message (12 bits available)
+ * Alert flags for ENGINE_DATA_1 message (8 bits available)
  */
-enum EngineAlerts : uint16_t {
-    ALERT_NONE = 0x000,
-    ALERT_EGT_HIGH = 0x001,
-    ALERT_CHT_HIGH = 0x002,
-    ALERT_OIL_TEMP_HIGH = 0x004,
-    ALERT_OIL_PRESSURE_LOW = 0x008,
-    ALERT_ENGINE_OVERHEAT = 0x010,
-    ALERT_SENSOR_FAILURE = 0x020,
-    // Bits 6-11 reserved for future use
+enum EngineAlerts : uint8_t {
+    ALERT_NONE = 0x00,
+    ALERT_EGT_HIGH = 0x01,
+    ALERT_CHT_HIGH = 0x02,
+    ALERT_OIL_TEMP_HIGH = 0x04,
+    ALERT_OIL_PRESSURE_LOW = 0x08,
+    ALERT_ENGINE_OVERHEAT = 0x10,
+    ALERT_SENSOR_FAILURE = 0x20,
+    // Bits 7-8 reserved for future use
 };
 
 /**
@@ -35,32 +35,35 @@ struct EngineData1 {
     int16_t engineAmbientCelsius;
     bool engineAmbientOverTemp;
 
-    uint8_t oilPressureX10;  // Pressure in bar * 10 (0-120)
+    int16_t oilPressureX10;  // Pressure in bar * 10 (0-120)
     bool oilPressureUnder;
 
-    uint16_t alerts;  // 12-bit alert flags
+    uint16_t rpm;  // Engine RPM (0-5000)
+
+    uint8_t alerts;  // 12-bit alert flags
 };
 
 /**
  * Packer/unpacker for ENGINE_DATA_1 CAN message
  *
  * Packs engine sensor data into 8-byte CAN frame:
- * - EGT1: 11 bits (10 bits value 0-1023 + 1 bit over-temp)
- * - CHT1: 11 bits (10 bits value 0-1023 + 1 bit over-temp)
- * - OIL_TEMP: 11 bits (10 bits value 0-1023 + 1 bit over-temp)
- * - ENGINE_AMBIENT: 11 bits (10 bits value 0-1023 + 1 bit over-temp)
- * - OIL_PRESSURE: 8 bits (7 bits value 0-127 + 1 bit under-pressure)
- * - ALERTS: 12 bits
+ * - EGT1: 8 + 1 bits (8 bits value 0-256 + 1 bit over-temp) with an offset of 250°C, step 2°C, range 250°C to +762°C. Values above 762°C are clamped to 762°C. Values below 250°C are clamped to 250°C.
+ * - CHT1: 8 + 1 bits (8 bits value 0-256 + 1 bit over-temp) with an offset of 50°C, step 1°C, range 50°C to +306°C. Values above 306°C are clamped to 306°C. Values below 50°C are clamped to 50°C.
+ * - OIL_TEMP: 8 + 1 bits (8 bits value 0-256 + 1 bit over-temp) with an offset of 50°C, step 1°C, range 50°C to +306°C. Values above 306°C are clamped to 306°C. Values below 50°C are clamped to 50°C.
+ * - ENGINE_AMBIENT: 8 + 1 bits (8 bits value 0-256 + 1 bit over-temp) with an offset of -50°C, step 3°C, range -50°C to +728°C. Values above 728°C are clamped to 728°C. Values below -50°C are clamped to -50°C.
+ * - RPM : 8 bits (0-5000 RPM) - with a step of 20 RPM, range 0-5100 RPM (values above 5100 RPM are clamped)
+ * - OIL_PRESSURE: 8 bits (8 bits value 0-256 + 1 bit under-pressure)
+ * - ALERTS: 8 bits
  *
  * Bit layout in 8 bytes (64 bits):
  * Byte 0: EGT1[0-7]
- * Byte 1: EGT1[8-10] | CHT1[0-4]
- * Byte 2: CHT1[5-10] | OIL_TEMP[0-1]
- * Byte 3: OIL_TEMP[2-9]
- * Byte 4: OIL_TEMP[10] | ENGINE_AMBIENT[0-6]
- * Byte 5: ENGINE_AMBIENT[7-10] | OIL_PRESSURE[0-3]
- * Byte 6: OIL_PRESSURE[4-7] | ALERTS[0-3]
- * Byte 7: ALERTS[4-11]
+ * Byte 1: CHT1[0-7]
+ * Byte 2: OIL_TEMP[0-7]
+ * Byte 3: ENGINE_AMBIENT[0-7]
+ * Byte 4: OIL_PRESSURE[0-7]
+ * Byte 5: RPM[0-7]
+ * Byte 6: not used
+ * Byte 7: ALERTS[0-7]
  */
 class EngineData1Packer {
 public:
@@ -70,36 +73,37 @@ public:
      * @param buffer 8-byte output buffer
      */
     static void pack(const EngineData1& data, uint8_t* buffer) {
-        uint16_t egt1 = packTemperature(data.egt1Celsius, data.egt1OverTemp);
-        uint16_t cht1 = packTemperature(data.cht1Celsius, data.cht1OverTemp);
-        uint16_t oilTemp = packTemperature(data.oilTempCelsius, data.oilTempOverTemp);
-        uint16_t engineAmbient = packTemperature(data.engineAmbientCelsius, data.engineAmbientOverTemp);
-        uint8_t oilPressure = packOilPressure(data.oilPressureX10, data.oilPressureUnder);
-        uint16_t alerts = data.alerts & 0x0FFF;
+        uint8_t warnings = 0;
+        uint8_t egt1 = packValue(data.egt1Celsius, data.egt1OverTemp, 250, 2, warnings, ALERT_EGT_HIGH);
+        uint8_t cht1 = packValue(data.cht1Celsius, data.cht1OverTemp, 50, 1, warnings, ALERT_CHT_HIGH);
+        uint8_t oilTemp = packValue(data.oilTempCelsius, data.oilTempOverTemp, 50, 1, warnings, ALERT_OIL_TEMP_HIGH);
+        uint8_t engineAmbient = packValue(data.engineAmbientCelsius, data.engineAmbientOverTemp, -50, 3, warnings, ALERT_ENGINE_OVERHEAT);
+        uint8_t oilPressure = packValue(data.oilPressureX10, data.oilPressureUnder, 0, 1, warnings, ALERT_OIL_PRESSURE_LOW);
+        uint8_t rpm = packValue(data.rpm, false, 0, 20);
 
-        // Byte 0: EGT1 bits 0-7
-        buffer[0] = egt1 & 0xFF;
+        // Byte 0: EGT1
+        buffer[0] = egt1;
 
-        // Byte 1: EGT1 bits 8-10 (3 bits) | CHT1 bits 0-4 (5 bits)
-        buffer[1] = ((egt1 >> 8) & 0x07) | ((cht1 & 0x1F) << 3);
+        // Byte 1: CHT
+        buffer[1] = cht1 ;
 
-        // Byte 2: CHT1 bits 5-10 (6 bits) | OIL_TEMP bits 0-1 (2 bits)
-        buffer[2] = ((cht1 >> 5) & 0x3F) | ((oilTemp & 0x03) << 6);
+        // Byte 2: OIL_TEMP
+        buffer[2] = oilTemp;
 
-        // Byte 3: OIL_TEMP bits 2-9 (8 bits)
-        buffer[3] = (oilTemp >> 2) & 0xFF;
+        // Byte 3: ENGINE_AMBIENT
+        buffer[3] = engineAmbient;
 
-        // Byte 4: OIL_TEMP bit 10 (1 bit) | ENGINE_AMBIENT bits 0-6 (7 bits)
-        buffer[4] = ((oilTemp >> 10) & 0x01) | ((engineAmbient & 0x7F) << 1);
+        // Byte 4: OIL_PRESSURE
+        buffer[4] = oilPressure;
 
-        // Byte 5: ENGINE_AMBIENT bits 7-10 (4 bits) | OIL_PRESSURE bits 0-3 (4 bits)
-        buffer[5] = ((engineAmbient >> 7) & 0x0F) | ((oilPressure & 0x0F) << 4);
+        // Byte 5: RPM
+        buffer[5] = rpm;
 
-        // Byte 6: OIL_PRESSURE bits 4-7 (4 bits) | ALERTS bits 0-3 (4 bits)
-        buffer[6] = ((oilPressure >> 4) & 0x0F) | ((alerts & 0x0F) << 4);
+        // Byte 6: warnings
+        buffer[6] = warnings;
 
-        // Byte 7: ALERTS bits 4-11 (8 bits)
-        buffer[7] = (alerts >> 4) & 0xFF;
+        // Byte 7: ALERTS bits (8 bits)
+        buffer[7] = data.alerts;
     }
 
     /**
@@ -109,21 +113,26 @@ public:
      */
     static void unpack(const uint8_t* buffer, EngineData1& data) {
         // Reconstruct packed values
-        uint16_t egt1 = buffer[0] | ((buffer[1] & 0x07) << 8);
-        uint16_t cht1 = ((buffer[1] >> 3) & 0x1F) | ((buffer[2] & 0x3F) << 5);
-        uint16_t oilTemp = ((buffer[2] >> 6) & 0x03) | (buffer[3] << 2) | ((buffer[4] & 0x01) << 10);
-        uint16_t engineAmbient = ((buffer[4] >> 1) & 0x7F) | ((buffer[5] & 0x0F) << 7);
-        uint8_t oilPressure = ((buffer[5] >> 4) & 0x0F) | ((buffer[6] & 0x0F) << 4);
-        uint16_t alerts = ((buffer[6] >> 4) & 0x0F) | (buffer[7] << 4);
+        uint8_t egt1 = buffer[0];
+        uint8_t cht1 = buffer[1];
+        uint8_t oilTemp = buffer[2];
+        uint8_t engineAmbient = buffer[3];
+        uint8_t oilPressure = buffer[4];
+        uint8_t rpm = buffer[5];
+        uint8_t warnings = buffer[6];
+        uint8_t alerts = buffer[7];
 
         // Unpack temperatures
-        unpackTemperature(egt1, data.egt1Celsius, data.egt1OverTemp);
-        unpackTemperature(cht1, data.cht1Celsius, data.cht1OverTemp);
-        unpackTemperature(oilTemp, data.oilTempCelsius, data.oilTempOverTemp);
-        unpackTemperature(engineAmbient, data.engineAmbientCelsius, data.engineAmbientOverTemp);
+        unpackValue(egt1, data.egt1Celsius, data.egt1OverTemp,250,2, warnings, ALERT_EGT_HIGH);
+        unpackValue(cht1, data.cht1Celsius, data.cht1OverTemp,50,1,warnings, ALERT_CHT_HIGH);
+        unpackValue(oilTemp, data.oilTempCelsius, data.oilTempOverTemp,50,1,warnings, ALERT_OIL_TEMP_HIGH);
+        unpackValue(engineAmbient, data.engineAmbientCelsius, data.engineAmbientOverTemp,-50,3,warnings, ALERT_ENGINE_OVERHEAT);
 
         // Unpack oil pressure
-        unpackOilPressure(oilPressure, data.oilPressureX10, data.oilPressureUnder);
+        unpackValue(oilPressure, data.oilPressureX10, data.oilPressureUnder, 0,1,warnings, ALERT_OIL_PRESSURE_LOW);
+
+        // unpack RPM
+        data.rpm = rpm * 20;
 
         // Alerts
         data.alerts = alerts;
@@ -131,42 +140,36 @@ public:
 
 private:
     /**
-     * Pack a temperature value with warning bit into 11 bits
+     * Pack a value with warning bit into 8 bits (with alert tracking)
      */
-    static uint16_t packTemperature(int16_t celsius, bool overTemp) {
-        uint16_t value = constrain(celsius, 0, 1023);
-        if (overTemp) {
-            value |= 0x0400;  // Set bit 10
+    static uint8_t packValue(int16_t value, bool warning, int16_t offset, uint8_t step, uint8_t& alert, uint8_t alertBit)
+    {
+        value = (value - offset) / step;
+        uint8_t packedValue = constrain(value, 0, 255);
+        if (warning) {
+            alert |= (alertBit);  // Set bit alertBit
         }
-        return value;
+        return packedValue;
     }
 
     /**
-     * Unpack an 11-bit temperature value
+     * Pack a value into 8 bits (without alert tracking)
      */
-    static void unpackTemperature(uint16_t packed, int16_t& celsius, bool& overTemp) {
-        celsius = packed & 0x03FF;  // Lower 10 bits
-        overTemp = (packed & 0x0400) != 0;  // Bit 10
+    static uint8_t packValue(int16_t value, bool warning, int16_t offset, uint8_t step)
+    {
+        value = (value - offset) / step;
+        uint8_t packedValue = constrain(value, 0, 255);
+        return packedValue;
     }
 
     /**
-     * Pack oil pressure value with warning bit into 8 bits
+     * Unpack a value (with alert checking)
      */
-    static uint8_t packOilPressure(uint8_t pressureX10, bool underPressure) {
-        uint8_t value = constrain(pressureX10, 0, 127);
-        if (underPressure) {
-            value |= 0x80;  // Set bit 7
-        }
-        return value;
-    }
-
-    /**
-     * Unpack an 8-bit oil pressure value
-     */
-    static void unpackOilPressure(uint8_t packed, uint8_t& pressureX10, bool& underPressure) {
-        pressureX10 = packed & 0x7F;  // Lower 7 bits
-        underPressure = (packed & 0x80) != 0;  // Bit 7
-    }
+    static void unpackValue(uint16_t packed, int16_t& value, bool& warning, int16_t offset, uint8_t step, uint8_t alert, uint8_t alertBit) {
+        value = packed & 0x03FF;  // Lower 10 bits
+        warning = (alert & alertBit) != 0;  // Bit alertBit
+        value = (value * step) + offset;
+    }   
 };
 
 } // namespace CanbusLogging

@@ -80,27 +80,23 @@ public:
     }
 
     /**
+     * Set engine RPM
+     * @param rpm Engine RPM (0-5000)
+     */
+    void setRPM(int16_t rpm) {
+        _data.rpm = rpm;
+    }
+
+    /**
      * Set alert flags
      * @param alerts Combination of EngineAlerts flags
      */
-    void setAlerts(uint16_t alerts) {
-        _data.alerts = alerts & 0x0FFF;
-    }
-
-    /**
-     * Add an alert flag
-     * @param alert Alert flag to add
-     */
-    void addAlert(EngineAlerts alert) {
-        _data.alerts |= (alert & 0x0FFF);
-    }
-
-    /**
-     * Clear an alert flag
-     * @param alert Alert flag to clear
-     */
-    void clearAlert(EngineAlerts alert) {
-        _data.alerts &= ~alert;
+    void setAlertFlag(uint8_t alertsFlag, bool enable) {
+        if (enable) {
+            _data.alerts |= alertsFlag;
+        } else {
+            _data.alerts &= ~alertsFlag;
+        }
     }
 
     /**
