@@ -68,6 +68,32 @@ EEPROM layout starting at 0x0100 (16 bytes reserved):
 Up to 12 unique CAN IDs are tracked simultaneously (RAM limited on ATmega328P). When the
 limit is reached, new IDs are silently dropped. Use `CLEAR` to reset and start fresh.
 
+## Startup sequence
+
+On every boot the firmware runs the following steps before entering the main loop:
+
+1. **Loopback self-test.** The MCP2515 is initialised in `MODE_LOOPBACK`. A test frame (CAN ID `0x7FF`, data `A5 5A 42 01`) is sent and received back. ID and data are verified.
+
+2. **Failure path.** If the test fails, `BUS ERROR` is shown on the LCD and `busError` is set. The monitor continues running (rotary encoder and serial still work) but no further CAN operations are attempted.
+
+3. **Switch to operating mode.** On success the controller is switched to `MODE_NORMAL` briefly.
+
+4. **SYSTEM_INIT broadcast.** A single `SYSTEM_INIT` frame is transmitted:
+
+   | Field | Value |
+   |-------|-------|
+   | CAN ID | `0x7F0` |
+   | Byte 0 | `0x02` (CanbusMonitor) |
+   | Byte 1–2 | `0x00 0x00` (passive listener, no primary data ID) |
+
+5. **Switch to listen-only.** After the init broadcast the controller switches to `MODE_LISTEN_ONLY` for normal operation.
+
+Serial output on a clean boot:
+```
+CANBUS_MONITOR_STARTED
+CAN OK, speed: 500 kbps
+```
+
 ## Simulator mode
 
 When built with `BUILD_SIMULATOR`, the CAN bus is initialised in normal (transmit) mode

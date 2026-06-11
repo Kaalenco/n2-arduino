@@ -1,0 +1,9 @@
+{
+  "DateTime": "2026-06-11T00:00:00+02:00",
+  "FileName": "00006-canbus-startup-verification-and-init-broadcast",
+  "RecordId": 6,
+  "TemplateType": "Ad",
+  "Title": "CAN bus startup verification and system initialized broadcast",
+  "Context": "Every CAN-capable system must verify hardware on startup via loopback self-test and broadcast a SYSTEM_INIT frame once it joins the bus.",
+  "References": {}
+}
