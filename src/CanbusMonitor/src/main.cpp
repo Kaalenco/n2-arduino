@@ -18,6 +18,11 @@ static const CanBusInterface::Speed SPEED_TABLE[] = {
     CanBusInterface::SPEED_500KBPS,
 };
 
+static const uint16_t CAN_ID_LOOPBACK_TEST  = 0x7FF;
+static const uint16_t CAN_ID_SYSTEM_INIT    = 0x7F0;
+static const uint8_t  SYSTEM_TYPE_CODE      = 0x02;  // CanbusMonitor
+static const uint8_t  LOOPBACK_TEST_DATA[4] = { 0xA5, 0x5A, 0x42, 0x01 };
+
 enum DisplayMode : uint8_t {
     DISPLAY_RAW_HEX = 0,
     DISPLAY_UINT16  = 1,
@@ -181,6 +186,61 @@ void runSimulator() {
 }
 #endif
 
+bool runCanStartup(CanBusInterface::Mode finalMode) {
+    if (can.begin(SPEED_TABLE[canSpeedIndex], CanBusInterface::MODE_LOOPBACK) != CanBusInterface::OK) {
+        Serial.println(F("CAN loopback init FAILED"));
+        return false;
+    }
+
+    CanBusInterface::Message testMsg;
+    testMsg.id       = CAN_ID_LOOPBACK_TEST;
+    testMsg.length   = 4;
+    testMsg.extended = false;
+    testMsg.rtr      = false;
+    memcpy(testMsg.data, LOOPBACK_TEST_DATA, 4);
+    memset(testMsg.data + 4, 0, 4);
+
+    if (can.sendMessage(testMsg) != CanBusInterface::OK) {
+        Serial.println(F("CAN loopback send FAILED"));
+        return false;
+    }
+
+    delay(10);
+
+    CanBusInterface::Message rxMsg;
+    if (can.receiveMessage(rxMsg, 50) != CanBusInterface::OK ||
+        rxMsg.id != CAN_ID_LOOPBACK_TEST || rxMsg.length != 4 ||
+        memcmp(rxMsg.data, LOOPBACK_TEST_DATA, 4) != 0) {
+        Serial.println(F("CAN loopback verify FAILED"));
+        return false;
+    }
+
+    if (can.setMode(CanBusInterface::MODE_NORMAL) != CanBusInterface::OK) {
+        Serial.println(F("CAN mode switch FAILED"));
+        return false;
+    }
+
+    CanBusInterface::Message initMsg;
+    initMsg.id       = CAN_ID_SYSTEM_INIT;
+    initMsg.length   = 3;
+    initMsg.extended = false;
+    initMsg.rtr      = false;
+    initMsg.data[0]  = SYSTEM_TYPE_CODE;
+    initMsg.data[1]  = 0x00;
+    initMsg.data[2]  = 0x00;
+    memset(initMsg.data + 3, 0, 5);
+    can.sendMessage(initMsg);
+
+    if (finalMode != CanBusInterface::MODE_NORMAL) {
+        if (can.setMode(finalMode) != CanBusInterface::OK) {
+            Serial.println(F("CAN final mode switch FAILED"));
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void setup() {
     Serial.begin(9600);
     Wire.begin();
@@ -200,13 +260,13 @@ void setup() {
 
 #ifdef BUILD_SIMULATOR
     Serial.println(F("CANBUS_MONITOR_SIMULATOR_STARTED"));
-    CanBusInterface::Result r = can.begin(SPEED_TABLE[canSpeedIndex], CanBusInterface::MODE_NORMAL);
+    bool canOk = runCanStartup(CanBusInterface::MODE_NORMAL);
 #else
     Serial.println(F("CANBUS_MONITOR_STARTED"));
-    CanBusInterface::Result r = can.begin(SPEED_TABLE[canSpeedIndex], CanBusInterface::MODE_LISTEN_ONLY);
+    bool canOk = runCanStartup(CanBusInterface::MODE_LISTEN_ONLY);
 #endif
 
-    if (r == CanBusInterface::OK) {
+    if (canOk) {
         busError = false;
         Serial.print(F("CAN OK, speed: "));
         static const char* labels[] = { "125", "250", "500" };
