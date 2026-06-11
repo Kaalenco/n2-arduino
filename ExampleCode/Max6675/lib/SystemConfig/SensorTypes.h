@@ -1,6 +1,5 @@
 // Define sensor types for the system
 // Maximum value is 0x7F
-// Rotation sensors: 0x70-0x79
 
 #define SENSOR_ALTIMETER 0x01
 
@@ -22,8 +21,3 @@
 #define SENSOR_TEMPERATURE_EGT_2 0x22
 #define SENSOR_TEMPERATURE_EGT_3 0x23
 #define SENSOR_TEMPERATURE_EGT_4 0x24
-
-// Define rotation sensor types
-#define SENSOR_RPM           0x70
-#define SENSOR_RPM_MAGNETO_1 0x71
-#define SENSOR_RPM_MAGNETO_2 0x72

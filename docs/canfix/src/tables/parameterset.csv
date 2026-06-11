@@ -1,0 +1,9 @@
+Byte,Payload
+0,0x0C-0x13
+1,Parameter ID LSB
+2,Parameter ID MSB
+3,Data LSB
+4,Data
+5,Data
+6,Data
+7,Data MSB
