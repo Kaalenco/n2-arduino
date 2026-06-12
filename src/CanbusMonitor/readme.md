@@ -129,15 +129,3 @@ Device ID:   0x1
 Aircraft ID: 0x0
 ```
 
-## Simulator mode
-
-When built with `BUILD_SIMULATOR` the CAN bus stays in `MODE_NORMAL` (transmit). A fixed
-table of `(CAN ID, interval ms, uint16 value)` entries is transmitted on schedule and also fed
-into the local message store. SD logging is still active in simulator mode.
-
-## Build environments
-
-| Environment | Purpose |
-|---|---|
-| `canbusMonitor` | Normal operation — listen-only on the CAN bus |
-| `canbusMonitorSimulator` | Simulator — transmits test frames from a fixed table |

@@ -32,22 +32,6 @@ enum DisplayMode : uint8_t {
     DISPLAY_MODES_COUNT = 2,
 };
 
-#ifdef BUILD_SIMULATOR
-struct SimEntry {
-    uint16_t canId;
-    uint16_t intervalMs;
-    uint16_t value;
-};
-
-static const SimEntry SIM_TABLE[] PROGMEM = {
-    { 0x0C0, 1000, 2400 },
-    { 0x0C1, 1000, 2390 },
-    { 0x101, 2000, 1013 },
-    { 0x102,  500,  980 },
-};
-static const uint8_t SIM_TABLE_SIZE = sizeof(SIM_TABLE) / sizeof(SIM_TABLE[0]);
-static unsigned long simLastSentMs[SIM_TABLE_SIZE] = {};
-#endif
 
 LiquidCrystal_I2C lcd(LCD_I2C_ADDR, LCD_COLS, LCD_ROWS);
 CanBusMCP2515 can;
@@ -254,34 +238,6 @@ void processSerial() {
     }
 }
 
-#ifdef BUILD_SIMULATOR
-void runSimulator() {
-    unsigned long now = millis();
-    for (uint8_t i = 0; i < SIM_TABLE_SIZE; i++) {
-        SimEntry entry;
-        memcpy_P(&entry, &SIM_TABLE[i], sizeof(SimEntry));
-        if (now - simLastSentMs[i] < entry.intervalMs) continue;
-        simLastSentMs[i] = now;
-
-        CanBusInterface::Message msg;
-        msg.id       = entry.canId;
-        msg.length   = 4;
-        msg.extended = false;
-        msg.rtr      = false;
-        msg.data[0]  = entry.value & 0xFF;
-        msg.data[1]  = (entry.value >> 8) & 0xFF;
-        msg.data[2]  = 0;
-        msg.data[3]  = 0;
-        memset(msg.data + 4, 0, 4);
-
-        if (can.sendMessage(msg) == CanBusInterface::OK) {
-            store.update(msg);
-            lastMessageMs = now;
-            busActive = true;
-        }
-    }
-}
-#endif
 
 void sendPing() {
     const char* canState;
@@ -394,13 +350,8 @@ void setup() {
         Serial.println(F("SD OK"));
     }
 
-#ifdef BUILD_SIMULATOR
-    Serial.println(F("CANBUS_MONITOR_SIMULATOR_STARTED"));
-    bool canOk = runCanStartup(CanBusInterface::MODE_NORMAL);
-#else
     Serial.println(F("CANBUS_MONITOR_STARTED"));
     bool canOk = runCanStartup(CanBusInterface::MODE_LISTEN_ONLY);
-#endif
 
     if (canOk) {
         busError = false;
@@ -434,11 +385,6 @@ void loop() {
         displayMode = (DisplayMode)((displayMode + 1) % DISPLAY_MODES_COUNT);
     }
 
-#ifdef BUILD_SIMULATOR
-    if (!busError) {
-        runSimulator();
-    }
-#else
     if (!busError && can.messageAvailable()) {
         CanBusInterface::Message msg;
         if (can.receiveMessage(msg) == CanBusInterface::OK) {
@@ -458,7 +404,6 @@ void loop() {
             if (sdLogger) sdLogger->log(msg);
         }
     }
-#endif
 
     if (!busError && busActive && (millis() - lastMessageMs > BUS_TIMEOUT_MS)) {
         busActive = false;
