@@ -125,6 +125,7 @@ private:
     }
 
     void _refreshFilePath() {
+        if (!_ready) return;  // SD not yet initialised; begin() will call us again
         char date[9];
         _rtc.getDateString(date);
 

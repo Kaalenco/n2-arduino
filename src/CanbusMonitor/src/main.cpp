@@ -84,9 +84,6 @@ uint8_t   canSpeedIndex;
 uint16_t  deviceId;
 uint16_t  aircraftId;
 
-// Declared as a static object to keep it out of the heap and avoid fragmentation.
-// sdLogger pointer is null until setup() configures it; all callers check for null.
-static CanMonitor::SdLogger sdLoggerObj(PIN_SD_CS, rtcClock, CM_DEFAULT_DEVICE_ID, CM_DEFAULT_AIRCRAFT_ID);
 CanMonitor::SdLogger* sdLogger = nullptr;
 
 int8_t      selectedIndex  = 0;
@@ -519,9 +516,7 @@ void setup() {
         Serial.println(F("RTC OK"));
     }
 
-    sdLoggerObj.setDeviceId(deviceId);
-    sdLoggerObj.setAircraftId(aircraftId);
-    sdLogger = &sdLoggerObj;
+    sdLogger = new CanMonitor::SdLogger(PIN_SD_CS, rtcClock, deviceId, aircraftId);
     sdReady  = sdLogger->begin();
     if (!sdReady) {
         Serial.println(F("SD init FAILED"));
@@ -548,13 +543,16 @@ void setup() {
     Serial.print(F("Device ID:   0x")); Serial.println(deviceId,   HEX);
     Serial.print(F("Aircraft ID: 0x")); Serial.println(aircraftId, HEX);
 
-    lastDisplayMs = millis();
+    unsigned long now = millis();
+    lastDisplayMs = now;
+    lastPingMs    = now;  // send first ping immediately, then every PING_INTERVAL_MS
     // CGRAM must be written after all I2C peripherals are initialised to avoid
     // leaving the bus in an unexpected state during RTC/SD startup.
     uint8_t backslashGlyph[8] = {0x10, 0x08, 0x04, 0x02, 0x01, 0x00, 0x00, 0x00};
     lcd.createChar(0, backslashGlyph);
     lcd.setCursor(0, 0);  // Return LCD to DDRAM mode after createChar
     updateDisplay();
+    sendPing();
 }
 
 void loop() {
