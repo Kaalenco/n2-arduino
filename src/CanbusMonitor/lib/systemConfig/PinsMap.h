@@ -1,11 +1,11 @@
 #ifndef CANMONITOR_PINS_MAP_H
 #define CANMONITOR_PINS_MAP_H
 
-// Rotary encoder breakout (3-button module: S1, S2, KEY)
-// Not a quadrature encoder — each pin is a simple active-low button.
-#define PIN_ENC_S1          5   // CW step (active low, internal pull-up)
-#define PIN_ENC_S2          6   // CCW step (active low, internal pull-up)
-#define PIN_ENC_KEY         7   // Push button (active low, internal pull-up)
+// KY-040 quadrature rotary encoder (CLK/S1, DT/S2, KEY). All active-low, internal pull-ups.
+// Direction is decoded by sampling S2 at the falling edge of S1 (see RotaryControl.h).
+#define PIN_ENC_S1          5   // CLK — trigger pin for step detection
+#define PIN_ENC_S2          6   // DT  — sampled for direction at S1 falling edge
+#define PIN_ENC_KEY         7   // Push button
 
 // SD card chip select (Seeed CAN Bus Shield V2.0)
 #define PIN_SD_CS           4

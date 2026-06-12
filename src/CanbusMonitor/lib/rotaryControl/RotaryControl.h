@@ -3,9 +3,12 @@
 
 #include <Arduino.h>
 
-// Polling-based 3-button rotary encoder breakout (S1 / S2 / KEY).
-// S1 = CW step, S2 = CCW step, KEY = push button.  All pins active-low
-// with internal pull-ups.  Call poll() every loop iteration.
+// Polling-based KY-040 quadrature rotary encoder (CLK/S1, DT/S2, KEY).
+// Direction is decoded by sampling S2 (DT) at the moment S1 (CLK) rises:
+//   S2 LOW  → CW  (+1)
+//   S2 HIGH → CCW (-1)
+// A cooldown on S1 prevents contact bounce from registering extra steps.
+// Call poll() every loop iteration.
 // getStep() returns -1, 0, or +1 since the last poll.
 // wasButtonPressed() returns true once on the falling edge of KEY.
 // Both values reset at the start of the next poll() call.
@@ -16,8 +19,7 @@ class RotaryControl {
 public:
     RotaryControl(uint8_t pinS1, uint8_t pinS2, uint8_t pinKey)
         : _pinS1(pinS1), _pinS2(pinS2), _pinKey(pinKey),
-          _lastS1(HIGH), _lastS2(HIGH),
-          _s1CooldownMs(0), _s2CooldownMs(0),
+          _lastS1(HIGH), _s1CooldownMs(0),
           _rawKey(HIGH), _stableKey(HIGH), _keyChangeMs(0),
           _step(0), _btnPressed(false) {}
 
@@ -26,9 +28,7 @@ public:
         pinMode(_pinS2,  INPUT_PULLUP);
         pinMode(_pinKey, INPUT_PULLUP);
         _lastS1       = digitalRead(_pinS1);
-        _lastS2       = digitalRead(_pinS2);
         _s1CooldownMs = 0;
-        _s2CooldownMs = 0;
         _rawKey       = digitalRead(_pinKey);
         _stableKey    = _rawKey;
         _keyChangeMs  = 0;
@@ -39,21 +39,14 @@ public:
         _btnPressed = false;
         unsigned long now = millis();
 
-        // S1 / S2: detect falling edge, then ignore the pin for STEP_DEBOUNCE_MS.
-        // This prevents contact bounce from registering as multiple steps.
+        // Quadrature decode: trigger on S1 (CLK) rising edge, sample S2 (DT) for direction.
+        // At the rising edge: DT LOW → CW (+1), DT HIGH → CCW (-1).
         uint8_t s1 = digitalRead(_pinS1);
-        if (s1 == LOW && _lastS1 == HIGH && (now - _s1CooldownMs) >= STEP_DEBOUNCE_MS) {
-            _step         = 1;
+        if (s1 == HIGH && _lastS1 == LOW && (now - _s1CooldownMs) >= STEP_DEBOUNCE_MS) {
+            _step         = (digitalRead(_pinS2) == LOW) ? 1 : -1;
             _s1CooldownMs = now;
         }
         _lastS1 = s1;
-
-        uint8_t s2 = digitalRead(_pinS2);
-        if (s2 == LOW && _lastS2 == HIGH && (now - _s2CooldownMs) >= STEP_DEBOUNCE_MS) {
-            _step         = -1;
-            _s2CooldownMs = now;
-        }
-        _lastS2 = s2;
 
         // KEY: commit a state change only after it has been stable for
         // KEY_DEBOUNCE_MS consecutive milliseconds.
@@ -77,8 +70,8 @@ private:
     static const uint8_t  STEP_DEBOUNCE_MS = 50;
 
     uint8_t        _pinS1, _pinS2, _pinKey;
-    uint8_t        _lastS1, _lastS2;
-    unsigned long  _s1CooldownMs, _s2CooldownMs;
+    uint8_t        _lastS1;
+    unsigned long  _s1CooldownMs;
     uint8_t        _rawKey, _stableKey;
     unsigned long  _keyChangeMs;
     int8_t         _step;

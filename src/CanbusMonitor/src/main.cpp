@@ -566,7 +566,9 @@ void loop() {
     if (!busError && can.messageAvailable()) {
         CanBusInterface::Message msg;
         if (can.receiveMessage(msg) == CanBusInterface::OK) {
-            store.update(msg);
+            if (msg.id < CAN_ID_CONFIG) {  // skip system/command IDs (≥ 0x7E0)
+                store.update(msg);
+            }
             lastMessageMs = millis();
             busActive = true;
 
