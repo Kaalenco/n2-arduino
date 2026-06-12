@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <mcp_can.h>
+#include "version.h"
 
 // Generic MCP2515 breakout board: 8 MHz crystal, CS on D10.
 static const uint8_t  PIN_CAN_CS         = 10;
@@ -63,6 +64,8 @@ void setup() {
     uint8_t initData[3] = { SYSTEM_TYPE_MOCK, 0x00, 0x00 };
     can.sendMsgBuf(CAN_ID_SYSTEM_INIT, 0, 3, initData);
     Serial.println(F("CAN_MOCK_STARTED"));
+    Serial.print(F("Firmware: v"));
+    Serial.print(FW_MAJOR); Serial.print('.'); Serial.print(FW_MINOR); Serial.print('.'); Serial.println(FW_BUILD);
 
     unsigned long now = millis();
     rpmStateMs = lastRpmMs = lastEgtMs = lastChtMs = now;

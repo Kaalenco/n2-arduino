@@ -17,6 +17,7 @@ public:
     RotaryControl(uint8_t pinS1, uint8_t pinS2, uint8_t pinKey)
         : _pinS1(pinS1), _pinS2(pinS2), _pinKey(pinKey),
           _lastS1(HIGH), _lastS2(HIGH),
+          _s1CooldownMs(0), _s2CooldownMs(0),
           _rawKey(HIGH), _stableKey(HIGH), _keyChangeMs(0),
           _step(0), _btnPressed(false) {}
 
@@ -24,33 +25,44 @@ public:
         pinMode(_pinS1,  INPUT_PULLUP);
         pinMode(_pinS2,  INPUT_PULLUP);
         pinMode(_pinKey, INPUT_PULLUP);
-        _lastS1    = digitalRead(_pinS1);
-        _lastS2    = digitalRead(_pinS2);
-        _rawKey    = digitalRead(_pinKey);
-        _stableKey = _rawKey;
-        _keyChangeMs = 0;
+        _lastS1       = digitalRead(_pinS1);
+        _lastS2       = digitalRead(_pinS2);
+        _s1CooldownMs = 0;
+        _s2CooldownMs = 0;
+        _rawKey       = digitalRead(_pinKey);
+        _stableKey    = _rawKey;
+        _keyChangeMs  = 0;
     }
 
     void poll() {
         _step       = 0;
         _btnPressed = false;
+        unsigned long now = millis();
 
+        // S1 / S2: detect falling edge, then ignore the pin for STEP_DEBOUNCE_MS.
+        // This prevents contact bounce from registering as multiple steps.
         uint8_t s1 = digitalRead(_pinS1);
-        if (s1 == LOW && _lastS1 == HIGH) _step = 1;
+        if (s1 == LOW && _lastS1 == HIGH && (now - _s1CooldownMs) >= STEP_DEBOUNCE_MS) {
+            _step         = 1;
+            _s1CooldownMs = now;
+        }
         _lastS1 = s1;
 
         uint8_t s2 = digitalRead(_pinS2);
-        if (s2 == LOW && _lastS2 == HIGH) _step = -1;
+        if (s2 == LOW && _lastS2 == HIGH && (now - _s2CooldownMs) >= STEP_DEBOUNCE_MS) {
+            _step         = -1;
+            _s2CooldownMs = now;
+        }
         _lastS2 = s2;
 
-        // Debounced KEY: commit a state change only after it has been stable
-        // for DEBOUNCE_MS consecutive milliseconds.
+        // KEY: commit a state change only after it has been stable for
+        // KEY_DEBOUNCE_MS consecutive milliseconds.
         uint8_t raw = digitalRead(_pinKey);
         if (raw != _rawKey) {
             _rawKey      = raw;
-            _keyChangeMs = millis();
+            _keyChangeMs = now;
         }
-        if (_rawKey != _stableKey && (millis() - _keyChangeMs) >= DEBOUNCE_MS) {
+        if (_rawKey != _stableKey && (now - _keyChangeMs) >= KEY_DEBOUNCE_MS) {
             _stableKey = _rawKey;
             if (_stableKey == LOW) _btnPressed = true;  // falling edge = press
         }
@@ -61,10 +73,12 @@ public:
     bool   isButtonDown()     const { return _stableKey == LOW; }
 
 private:
-    static const uint8_t DEBOUNCE_MS = 20;
+    static const uint8_t  KEY_DEBOUNCE_MS  = 20;
+    static const uint8_t  STEP_DEBOUNCE_MS = 50;
 
     uint8_t        _pinS1, _pinS2, _pinKey;
     uint8_t        _lastS1, _lastS2;
+    unsigned long  _s1CooldownMs, _s2CooldownMs;
     uint8_t        _rawKey, _stableKey;
     unsigned long  _keyChangeMs;
     int8_t         _step;

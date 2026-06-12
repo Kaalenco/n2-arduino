@@ -10,6 +10,7 @@
 #include <SdLogger.h>
 #include <PinsMap.h>
 #include <CanMonitorMemoryMap.h>
+#include "version.h"
 
 static const unsigned long DISPLAY_REFRESH_MS = 250;
 static const unsigned long BUS_TIMEOUT_MS     = 3000;
@@ -466,14 +467,15 @@ void setup() {
 
     lcd.init();
     lcd.backlight();
-    // Custom CGRAM slot 0: backslash glyph (0x5C maps to ¥ in the HD44780A00 ROM)
-    uint8_t backslashGlyph[8] = {0x10, 0x08, 0x04, 0x02, 0x01, 0x00, 0x00, 0x00};
-    lcd.createChar(0, backslashGlyph);
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print(F("Canbus Monitor"));
-    lcd.setCursor(0, 1);
-    lcd.print(F("Initializing..."));
+    {
+        char verBuf[17];
+        snprintf(verBuf, sizeof(verBuf), "v%u.%u.%u", FW_MAJOR, FW_MINOR, FW_BUILD);
+        lcd.setCursor(0, 1);
+        lcd.print(verBuf);
+    }
 
     rotary.begin();
 
@@ -495,6 +497,8 @@ void setup() {
     }
 
     Serial.println(F("CANBUS_MONITOR_STARTED"));
+    Serial.print(F("Firmware: v"));
+    Serial.print(FW_MAJOR); Serial.print('.'); Serial.print(FW_MINOR); Serial.print('.'); Serial.println(FW_BUILD);
     bool canOk = runCanStartup(CanBusInterface::MODE_NORMAL);
 
     if (canOk) {
@@ -512,6 +516,11 @@ void setup() {
     Serial.print(F("Aircraft ID: 0x")); Serial.println(aircraftId, HEX);
 
     lastDisplayMs = millis();
+    // CGRAM must be written after all I2C peripherals are initialised to avoid
+    // leaving the bus in an unexpected state during RTC/SD startup.
+    uint8_t backslashGlyph[8] = {0x10, 0x08, 0x04, 0x02, 0x01, 0x00, 0x00, 0x00};
+    lcd.createChar(0, backslashGlyph);
+    lcd.setCursor(0, 0);  // Return LCD to DDRAM mode after createChar
     updateDisplay();
 }
 

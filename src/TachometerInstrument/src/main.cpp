@@ -10,6 +10,7 @@
 #include <EepromConfigure.h>
 #include <PinsMap.h>
 #include <TachMemoryMap.h>
+#include "version.h"
 
 static const unsigned long MEASURE_INTERVAL_MS = 1000;
 
@@ -161,13 +162,19 @@ void setup() {
     display.print(F("Tachometer"));
     display.setTextSize(1);
     display.setCursor(0, 40);
-    display.print(F("Initializing..."));
+    {
+        char verBuf[17];
+        snprintf(verBuf, sizeof(verBuf), "v%u.%u.%u", FW_MAJOR, FW_MINOR, FW_BUILD);
+        display.print(verBuf);
+    }
     display.display();
 
     RpmSensor::begin(PIN_RPM_PULSE, pulsesPerRev, RPM_PULSE_TRIGGER);
     lastMeasureMs = millis();
 
     Serial.println(F("TACHOMETER_STARTED"));
+    Serial.print(F("Firmware: v"));
+    Serial.print(FW_MAJOR); Serial.print('.'); Serial.print(FW_MINOR); Serial.print('.'); Serial.println(FW_BUILD);
     Serial.print(F("Pulses/rev: ")); Serial.println(pulsesPerRev);
     Serial.print(F("Max RPM:    ")); Serial.println(maxRpm);
     Serial.print(F("CAN ID:     0x")); Serial.println(canId, HEX);

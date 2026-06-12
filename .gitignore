@@ -7,3 +7,4 @@
 .claude
 CLAUDE.md
 EngineMonitor/.serena
+src/*/src/build_number.h
