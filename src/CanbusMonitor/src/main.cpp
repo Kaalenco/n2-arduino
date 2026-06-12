@@ -304,13 +304,10 @@ bool runCanStartup(CanBusInterface::Mode finalMode) {
     memset(initMsg.data + 3, 0, 5);
     can.sendMessage(initMsg);
 
-    if (finalMode != CanBusInterface::MODE_NORMAL) {
-        // Re-init to clear any Bus-Off state caused by the unanswered SYSTEM_INIT broadcast.
-        // The MCP2515 hardware reset guarantees a clean transition to the final mode.
-        if (can.begin(SPEED_TABLE[canSpeedIndex], finalMode) != CanBusInterface::OK) {
-            Serial.println(F("CAN listen mode init FAILED"));
-            return false;
-        }
+    // Re-init to clear any Bus-Off state from the unanswered SYSTEM_INIT broadcast.
+    if (can.begin(SPEED_TABLE[canSpeedIndex], finalMode) != CanBusInterface::OK) {
+        Serial.println(F("CAN init FAILED"));
+        return false;
     }
 
     return true;
@@ -351,7 +348,7 @@ void setup() {
     }
 
     Serial.println(F("CANBUS_MONITOR_STARTED"));
-    bool canOk = runCanStartup(CanBusInterface::MODE_LISTEN_ONLY);
+    bool canOk = runCanStartup(CanBusInterface::MODE_NORMAL);
 
     if (canOk) {
         busError = false;

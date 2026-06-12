@@ -3,36 +3,47 @@
 #include <mcp_can.h>
 
 // Generic MCP2515 breakout board: 8 MHz crystal, CS on D10.
-static const uint8_t  PIN_CAN_CS        = 10;
+static const uint8_t  PIN_CAN_CS         = 10;
 static const uint32_t CAN_ID_SYSTEM_INIT = 0x7F0;
-static const uint8_t  SYSTEM_TYPE_MOCK   = 0x10;  // CanMock
+static const uint8_t  SYSTEM_TYPE_MOCK   = 0x10;
 
-struct MockEntry {
-    uint16_t canId;
-    uint16_t intervalMs;
-    uint16_t value;
-};
+static const uint16_t CAN_ID_RPM = 0x0C0;
+static const uint16_t CAN_ID_EGT = 0x0D0;  // temperature ×10 (0.1 °C units)
+static const uint16_t CAN_ID_CHT = 0x0D1;  // temperature ×10 (0.1 °C units)
 
-// Fixed mock frames transmitted on schedule.
-// value is sent as uint16 little-endian in bytes 0-1; bytes 2-3 are zero.
-static const MockEntry MOCK_TABLE[] PROGMEM = {
-    { 0x0C0, 1000, 2400 },   // RPM
-    { 0x0C1, 1000, 2390 },   // RPM (secondary)
-    { 0x101, 2000, 1013 },   // Baro pressure (mbar)
-    { 0x102,  500,  980 },   // Altitude pressure (mbar)
-};
-static const uint8_t MOCK_TABLE_SIZE = sizeof(MOCK_TABLE) / sizeof(MOCK_TABLE[0]);
-static unsigned long lastSentMs[MOCK_TABLE_SIZE] = {};
+static const unsigned long RPM_SEND_MS  = 1000;
+static const unsigned long TEMP_SEND_MS = 10000;
+
+// --- RPM state machine -------------------------------------------
+// Sequence: idle (700) 10 s → cruise (1700) 10 s → overspeed (2700) 2 s → repeat
+enum RpmState : uint8_t { RPM_IDLE = 0, RPM_CRUISE = 1, RPM_OVERSPEED = 2 };
+static const uint16_t      RPM_VALUE[]    = { 700,   1700,  2700  };
+static const unsigned long RPM_DURATION[] = { 10000, 10000, 2000  };
+
+static RpmState       rpmState    = RPM_IDLE;
+static unsigned long  rpmStateMs  = 0;
+static unsigned long  lastRpmMs   = 0;
+
+// --- Temperature triangle waves ----------------------------------
+// Values in 0.1 °C.  step cycles 0..199: 0-100 rising, 101-199 falling.
+// EGT: 80.0–180.0 °C  (800–1800, 100 steps of 10)
+// CHT: 70.0–120.0 °C  (700–1200, 100 steps of 5)
+static uint8_t       egtStep   = 0;
+static unsigned long lastEgtMs = 0;
+static uint8_t       chtStep   = 0;
+static unsigned long lastChtMs = 0;
 
 MCP_CAN can(PIN_CAN_CS);
 bool canReady = false;
 
-bool sendFrame(uint16_t id, uint16_t value) {
-    uint8_t data[4] = {
-        (uint8_t)(value & 0xFF),
-        (uint8_t)(value >> 8),
-        0, 0
-    };
+// Triangle wave: step 0..199 maps to minVal at 0 and 200, maxVal at 100.
+static uint16_t triangleVal(uint8_t step, uint16_t minVal, uint16_t maxVal) {
+    uint8_t s = (step <= 100) ? step : (uint8_t)(200 - step);
+    return minVal + (uint16_t)((uint32_t)s * (maxVal - minVal) / 100);
+}
+
+static bool sendFrame(uint16_t id, uint16_t value) {
+    uint8_t data[4] = { (uint8_t)(value & 0xFF), (uint8_t)(value >> 8), 0, 0 };
     return can.sendMsgBuf((uint32_t)id, 0, 4, data) == CAN_OK;
 }
 
@@ -46,30 +57,48 @@ void setup() {
     can.setMode(MCP_NORMAL);
     canReady = true;
 
+    // SYSTEM_INIT identifies this node on the bus (best-effort; no ACK required).
     uint8_t initData[3] = { SYSTEM_TYPE_MOCK, 0x00, 0x00 };
     can.sendMsgBuf(CAN_ID_SYSTEM_INIT, 0, 3, initData);
-
     Serial.println(F("CAN_MOCK_STARTED"));
+
+    unsigned long now = millis();
+    rpmStateMs = lastRpmMs = lastEgtMs = lastChtMs = now;
 }
 
 void loop() {
     if (!canReady) return;
-
     unsigned long now = millis();
-    for (uint8_t i = 0; i < MOCK_TABLE_SIZE; i++) {
-        MockEntry entry;
-        memcpy_P(&entry, &MOCK_TABLE[i], sizeof(MockEntry));
-        if (now - lastSentMs[i] < entry.intervalMs) continue;
-        lastSentMs[i] = now;
 
-        if (sendFrame(entry.canId, entry.value)) {
-            Serial.print(F("TX 0x"));
-            Serial.print(entry.canId, HEX);
-            Serial.print(F(" = "));
-            Serial.println(entry.value);
-        } else {
-            Serial.print(F("TX FAILED 0x"));
-            Serial.println(entry.canId, HEX);
-        }
+    // RPM — advance state machine then send on interval
+    if (now - rpmStateMs >= RPM_DURATION[rpmState]) {
+        rpmState   = (RpmState)((rpmState + 1) % 3);
+        rpmStateMs = now;
+        Serial.print(F("RPM state -> "));
+        Serial.println(RPM_VALUE[rpmState]);
+    }
+    if (now - lastRpmMs >= RPM_SEND_MS) {
+        lastRpmMs = now;
+        sendFrame(CAN_ID_RPM, RPM_VALUE[rpmState]);
+    }
+
+    // EGT — triangle 80.0–180.0 °C, step every 10 s
+    if (now - lastEgtMs >= TEMP_SEND_MS) {
+        lastEgtMs = now;
+        egtStep   = (egtStep + 1) % 200;
+        uint16_t egt = triangleVal(egtStep, 800, 1800);
+        sendFrame(CAN_ID_EGT, egt);
+        Serial.print(F("EGT "));
+        Serial.print(egt / 10); Serial.print('.'); Serial.println(egt % 10);
+    }
+
+    // CHT — triangle 70.0–120.0 °C, step every 10 s
+    if (now - lastChtMs >= TEMP_SEND_MS) {
+        lastChtMs = now;
+        chtStep   = (chtStep + 1) % 200;
+        uint16_t cht = triangleVal(chtStep, 700, 1200);
+        sendFrame(CAN_ID_CHT, cht);
+        Serial.print(F("CHT "));
+        Serial.print(cht / 10); Serial.print('.'); Serial.println(cht % 10);
     }
 }
