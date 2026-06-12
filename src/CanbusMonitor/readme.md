@@ -237,15 +237,15 @@ on a fresh clone).
 The version is shown on LCD line 2 during boot and printed on serial after
 `CANBUS_MONITOR_STARTED`. Use it to confirm a successful flash.
 
-## Memory usage (build 18, Arduino Uno ATmega328P)
+## Memory usage (build 19, Arduino Uno ATmega328P)
 
 | Resource | Used | Total | Percentage |
 |---|---|---|---|
-| Flash | 29 414 bytes | 32 256 bytes | 91.2% |
-| RAM (static) | 1 631 bytes | 2 048 bytes | 79.6% |
+| Flash | 29 516 bytes | 32 256 bytes | 91.5% |
+| RAM (static) | 1 673 bytes | 2 048 bytes | 81.7% |
 
 Avoid adding string literals without the `F()` macro. RAM headroom is approximately
-417 bytes; the stack and heap share this space, so deep call chains or large local buffers
+375 bytes; the stack and heap share this space, so deep call chains or large local buffers
 will cause silent corruption. Any significant feature addition should be weighed against a
 RAM audit.
 
