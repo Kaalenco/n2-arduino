@@ -28,11 +28,50 @@ static const uint16_t CAN_ID_SYSRESET       = 0x7EF;
 static const uint8_t  SYSTEM_TYPE_CODE      = 0x02;  // CanbusMonitor
 static const uint8_t  LOOPBACK_TEST_DATA[4] = { 0xA5, 0x5A, 0x42, 0x01 };
 
-enum DisplayMode : uint8_t {
-    DISPLAY_RAW_HEX = 0,
-    DISPLAY_UINT16  = 1,
-    DISPLAY_MODES_COUNT = 2,
+// --- Known CAN ID display metadata -----------------------------------------
+
+struct CanIdInfo {
+    uint32_t id;
+    char     mnemonic[4];  // 3 chars + null
+    char     unit[5];      // up to 4 chars + null
+    bool     divBy10;      // raw value is ×10 — divide before display
 };
+
+static const CanIdInfo CAN_INFO_TABLE[] = {
+    { 0x0C0, "RPM", "RPM", false },
+    { 0x0D0, "EGT", "C",   true  },
+    { 0x0D1, "CHT", "C",   true  },
+};
+static const uint8_t CAN_INFO_COUNT = sizeof(CAN_INFO_TABLE) / sizeof(CAN_INFO_TABLE[0]);
+
+static const CanIdInfo* findCanInfo(uint32_t id) {
+    for (uint8_t i = 0; i < CAN_INFO_COUNT; i++) {
+        if (CAN_INFO_TABLE[i].id == id) return &CAN_INFO_TABLE[i];
+    }
+    return nullptr;
+}
+
+// --- Warning thresholds (RAM; updated by SET commands) ----------------------
+
+struct CanWarnState {
+    uint32_t canId;
+    uint16_t warnHi;  // warn "HI" if raw value >= warnHi (0 = disabled)
+    uint16_t warnLo;  // warn "LO" if raw value <= warnLo (0 = disabled)
+};
+
+static CanWarnState warnTable[] = {
+    { 0x0C0, 2800, 0 },     // RPM: default redline 2800
+    { 0x0D0, 1500, 0 },     // EGT: default caution high 150°C (raw 1500)
+    { 0x0D1, 1100, 0 },     // CHT: default caution high 110°C (raw 1100)
+};
+static const uint8_t WARN_TABLE_SIZE = sizeof(warnTable) / sizeof(warnTable[0]);
+
+static CanWarnState* findWarnState(uint32_t id) {
+    for (uint8_t i = 0; i < WARN_TABLE_SIZE; i++) {
+        if (warnTable[i].canId == id) return &warnTable[i];
+    }
+    return nullptr;
+}
 
 
 LiquidCrystal_I2C lcd(LCD_I2C_ADDR, LCD_COLS, LCD_ROWS);
@@ -48,7 +87,7 @@ uint16_t  aircraftId;
 CanMonitor::SdLogger* sdLogger = nullptr;
 
 int8_t      selectedIndex  = 0;
-DisplayMode displayMode    = DISPLAY_RAW_HEX;
+bool        lcdBacklightOn = true;
 bool        busActive      = false;
 bool        busError       = false;
 bool        sdReady        = false;
@@ -107,16 +146,30 @@ void updateDisplay() {
     const CanMonitor::CanEntry* entry = store.getAt((uint8_t)selectedIndex);
     if (entry == nullptr) {
         lcdRow(1, "No data");
-    } else if (displayMode == DISPLAY_RAW_HEX) {
-        snprintf(line, sizeof(line), "%03lX %02X%02X %02X%02X",
-                 entry->id,
-                 entry->data[0], entry->data[1],
-                 entry->data[2], entry->data[3]);
-        lcdRow(1, line);
     } else {
-        uint16_t w0 = entry->data[0] | ((uint16_t)entry->data[1] << 8);
-        uint16_t w1 = entry->data[2] | ((uint16_t)entry->data[3] << 8);
-        snprintf(line, sizeof(line), "%03lX %5u %5u", entry->id, w0, w1);
+        const CanIdInfo*   info = findCanInfo(entry->id);
+        const CanWarnState* ws  = findWarnState(entry->id);
+        uint16_t raw = entry->data[0] | ((uint16_t)entry->data[1] << 8);
+
+        char valBuf[12];
+        if (info == nullptr) {
+            snprintf(valBuf, sizeof(valBuf), "%02X%02X %02X%02X",
+                     entry->data[0], entry->data[1],
+                     entry->data[2], entry->data[3]);
+        } else if (info->divBy10) {
+            snprintf(valBuf, sizeof(valBuf), "%u %s", raw / 10, info->unit);
+        } else {
+            snprintf(valBuf, sizeof(valBuf), "%u %s", raw, info->unit);
+        }
+
+        const char* warn = "  ";
+        if (ws) {
+            if      (ws->warnHi > 0 && raw >= ws->warnHi) warn = "HI";
+            else if (ws->warnLo > 0 && raw <= ws->warnLo) warn = "LO";
+        }
+
+        snprintf(line, sizeof(line), "%-3s %-10s%-2s",
+                 info ? info->mnemonic : "???", valBuf, warn);
         lcdRow(1, line);
     }
 }
@@ -167,6 +220,21 @@ static bool lookupConfig(const String& type, const String& param,
         if (param == F("CAH")) { paramId = 0x02; return true; }  // caution high
     }
     return false;
+}
+
+// Maps (targetType, paramId) from a SET command to a local warning threshold.
+static void applyLocalConfig(uint8_t targetType, uint8_t paramId, uint16_t value) {
+    uint32_t canId = 0;
+    bool isHi = false;
+    if      (targetType == 0x01 && paramId == 0x03) { canId = 0x0C0; isHi = true;  }  // RPM RED
+    else if (targetType == 0x03 && paramId == 0x02) { canId = 0x0D0; isHi = true;  }  // EGT CAH
+    else if (targetType == 0x03 && paramId == 0x01) { canId = 0x0D0; isHi = false; }  // EGT CAL
+    else if (targetType == 0x04 && paramId == 0x02) { canId = 0x0D1; isHi = true;  }  // CHT CAH
+    else if (targetType == 0x04 && paramId == 0x01) { canId = 0x0D1; isHi = false; }  // CHT CAL
+    if (canId == 0) return;
+    CanWarnState* ws = findWarnState(canId);
+    if (!ws) return;
+    if (isHi) ws->warnHi = value; else ws->warnLo = value;
 }
 
 // Parse a 4-digit hex string to uint16.  Returns false if not valid hex.
@@ -304,6 +372,7 @@ void processSerial() {
             return;
         }
         sendConfig(targetType, paramId, value);
+        applyLocalConfig(targetType, paramId, value);
         Serial.print(F("CONFIG sent: ")); Serial.print(typeStr);
         Serial.print(':'); Serial.print(paramStr);
         Serial.print('='); Serial.println(value);
@@ -453,8 +522,33 @@ void loop() {
         if (selectedIndex >= (int8_t)store.count())   selectedIndex = 0;
     }
 
-    if (rotary.wasButtonPressed()) {
-        displayMode = (DisplayMode)((displayMode + 1) % DISPLAY_MODES_COUNT);
+    // Short press: toggle backlight.  Hold ≥ 5 s: software reset.
+    {
+        static unsigned long keyPressedAt = 0;
+        static bool          keyHandled   = false;
+
+        if (rotary.wasButtonPressed()) {
+            keyPressedAt = millis();
+            keyHandled   = false;
+        }
+        if (keyPressedAt > 0) {
+            bool stillHeld = (digitalRead(PIN_ENC_KEY) == LOW);
+            if (!keyHandled && (millis() - keyPressedAt >= 5000)) {
+                keyHandled = true;
+                Serial.println(F("KEY held 5s — resetting..."));
+                Serial.flush();
+                void (*reset)() = nullptr;
+                reset();
+            }
+            if (!stillHeld) {
+                if (!keyHandled) {
+                    lcdBacklightOn = !lcdBacklightOn;
+                    if (lcdBacklightOn) lcd.backlight(); else lcd.noBacklight();
+                }
+                keyPressedAt = 0;
+                keyHandled   = false;
+            }
+        }
     }
 
     if (!busError && can.messageAvailable()) {
