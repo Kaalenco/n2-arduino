@@ -532,7 +532,7 @@ void loop() {
             keyHandled   = false;
         }
         if (keyPressedAt > 0) {
-            bool stillHeld = (digitalRead(PIN_ENC_KEY) == LOW);
+            bool stillHeld = rotary.isButtonDown();
             if (!keyHandled && (millis() - keyPressedAt >= 5000)) {
                 keyHandled = true;
                 Serial.println(F("KEY held 5s — resetting..."));
