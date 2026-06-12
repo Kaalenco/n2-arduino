@@ -5,6 +5,8 @@
 // Generic MCP2515 breakout board: 8 MHz crystal, CS on D10.
 static const uint8_t  PIN_CAN_CS         = 10;
 static const uint32_t CAN_ID_SYSTEM_INIT = 0x7F0;
+static const uint32_t CAN_ID_CONFIG      = 0x7E0;
+static const uint32_t CAN_ID_SYSRESET    = 0x7EF;
 static const uint8_t  SYSTEM_TYPE_MOCK   = 0x10;
 
 static const uint16_t CAN_ID_RPM = 0x0C0;
@@ -66,9 +68,33 @@ void setup() {
     rpmStateMs = lastRpmMs = lastEgtMs = lastChtMs = now;
 }
 
+static void checkIncoming() {
+    if (can.checkReceive() != CAN_MSGAVAIL) return;
+    unsigned long rxId;
+    uint8_t len;
+    uint8_t data[8] = {};
+    can.readMsgBuf(&rxId, &len, data);
+
+    if (rxId == CAN_ID_SYSRESET) {
+        Serial.println(F("SYSRESET received, resetting..."));
+        Serial.flush();
+        void (*reset)() = nullptr;
+        reset();
+    } else if (rxId == CAN_ID_CONFIG) {
+        uint8_t  targetType = len > 0 ? data[0] : 0xFF;
+        uint8_t  paramId    = len > 1 ? data[1] : 0;
+        uint16_t value      = len > 3 ? (data[2] | ((uint16_t)data[3] << 8)) : 0;
+        Serial.print(F("CONFIG type=0x")); Serial.print(targetType, HEX);
+        Serial.print(F(" param=0x"));     Serial.print(paramId, HEX);
+        Serial.print(F(" value="));       Serial.println(value);
+    }
+}
+
 void loop() {
     if (!canReady) return;
     unsigned long now = millis();
+
+    checkIncoming();
 
     // RPM — advance state machine then send on interval
     if (now - rpmStateMs >= RPM_DURATION[rpmState]) {

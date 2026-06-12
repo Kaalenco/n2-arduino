@@ -23,6 +23,8 @@ static const CanBusInterface::Speed SPEED_TABLE[] = {
 
 static const uint16_t CAN_ID_LOOPBACK_TEST  = 0x7FF;
 static const uint16_t CAN_ID_SYSTEM_INIT    = 0x7F0;
+static const uint16_t CAN_ID_CONFIG         = 0x7E0;
+static const uint16_t CAN_ID_SYSRESET       = 0x7EF;
 static const uint8_t  SYSTEM_TYPE_CODE      = 0x02;  // CanbusMonitor
 static const uint8_t  LOOPBACK_TEST_DATA[4] = { 0xA5, 0x5A, 0x42, 0x01 };
 
@@ -117,6 +119,54 @@ void updateDisplay() {
         snprintf(line, sizeof(line), "%03lX %5u %5u", entry->id, w0, w1);
         lcdRow(1, line);
     }
+}
+
+static void sendBusReset() {
+    CanBusInterface::Message msg;
+    msg.id       = CAN_ID_SYSRESET;
+    msg.length   = 0;
+    msg.extended = false;
+    msg.rtr      = false;
+    memset(msg.data, 0, 8);
+    can.sendMessage(msg);
+}
+
+static void sendConfig(uint8_t targetType, uint8_t paramId, uint16_t value) {
+    CanBusInterface::Message msg;
+    msg.id       = CAN_ID_CONFIG;
+    msg.length   = 4;
+    msg.extended = false;
+    msg.rtr      = false;
+    msg.data[0]  = targetType;
+    msg.data[1]  = paramId;
+    msg.data[2]  = value & 0xFF;
+    msg.data[3]  = (value >> 8) & 0xFF;
+    memset(msg.data + 4, 0, 4);
+    can.sendMessage(msg);
+}
+
+// Returns true and fills targetType/paramId if type/param strings are known.
+// Param mnemonics are 3 characters — see docs/can-param-mnemonics.md.
+static bool lookupConfig(const String& type, const String& param,
+                         uint8_t& targetType, uint8_t& paramId) {
+    if (type == F("RPM")) {
+        targetType = 0x01;
+        if (param == F("GRL")) { paramId = 0x01; return true; }  // green arc low
+        if (param == F("GRH")) { paramId = 0x02; return true; }  // green arc high
+        if (param == F("RED")) { paramId = 0x03; return true; }  // red line
+    } else if (type == F("ALT")) {
+        targetType = 0x02;
+        if (param == F("QNH")) { paramId = 0x01; return true; }  // altimeter setting
+    } else if (type == F("EGT")) {
+        targetType = 0x03;
+        if (param == F("CAL")) { paramId = 0x01; return true; }  // caution low
+        if (param == F("CAH")) { paramId = 0x02; return true; }  // caution high
+    } else if (type == F("CHT")) {
+        targetType = 0x04;
+        if (param == F("CAL")) { paramId = 0x01; return true; }  // caution low
+        if (param == F("CAH")) { paramId = 0x02; return true; }  // caution high
+    }
+    return false;
 }
 
 // Parse a 4-digit hex string to uint16.  Returns false if not valid hex.
@@ -233,8 +283,33 @@ void processSerial() {
         f.close();
         Serial.println(F("END"));
 
+    } else if (cmd == F("SYSRESET")) {
+        sendBusReset();
+        Serial.println(F("SYSRESET broadcast."));
+
+    } else if (cmd.startsWith(F("SET:"))) {
+        // SET:<TYPE>:<PARAM>:<VALUE>  e.g. SET:RPM:GRL:700
+        String rest = cmd.substring(4);
+        int c1 = rest.indexOf(':');
+        if (c1 < 0) { Serial.println(F("ERR: SET:<TYPE>:<PARAM>:<VALUE>")); return; }
+        String typeStr  = rest.substring(0, c1);
+        String rest2    = rest.substring(c1 + 1);
+        int c2          = rest2.indexOf(':');
+        if (c2 < 0) { Serial.println(F("ERR: SET:<TYPE>:<PARAM>:<VALUE>")); return; }
+        String paramStr = rest2.substring(0, c2);
+        uint16_t value  = (uint16_t)rest2.substring(c2 + 1).toInt();
+        uint8_t targetType, paramId;
+        if (!lookupConfig(typeStr, paramStr, targetType, paramId)) {
+            Serial.println(F("ERR: unknown type/param"));
+            return;
+        }
+        sendConfig(targetType, paramId, value);
+        Serial.print(F("CONFIG sent: ")); Serial.print(typeStr);
+        Serial.print(':'); Serial.print(paramStr);
+        Serial.print('='); Serial.println(value);
+
     } else {
-        Serial.println(F("Commands: TIME:<unix>  DEVID:<hex4>  AIRCRAFT:<hex4>  SPEED:<kbps>  CLEAR  LIST  RESET  DOWNLOAD:<date>"));
+        Serial.println(F("Commands: TIME:<unix>  DEVID:<hex4>  AIRCRAFT:<hex4>  SPEED:<kbps>  CLEAR  LIST  RESET  DOWNLOAD:<date>  SYSRESET  SET:<TYPE>:<PARAM>:<VALUE>"));
     }
 }
 
