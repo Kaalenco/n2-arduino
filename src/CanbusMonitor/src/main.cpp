@@ -39,9 +39,9 @@ struct CanIdInfo {
 };
 
 static const CanIdInfo CAN_INFO_TABLE[] = {
-    { 0x0C0, "RPM", "RPM", false },
-    { 0x0D0, "EGT", "C",   true  },
-    { 0x0D1, "CHT", "C",   true  },
+    { 0x0C0, "RPM", "",    false },
+    { 0x0D0, "EGT", "\001C", true  },
+    { 0x0D1, "CHT", "\001C", true  },
 };
 static const uint8_t CAN_INFO_COUNT = sizeof(CAN_INFO_TABLE) / sizeof(CAN_INFO_TABLE[0]);
 
@@ -174,25 +174,28 @@ void updateDisplay() {
             const CanWarnState* ws  = findWarnState(entry->id);
             uint16_t raw = entry->data[0] | ((uint16_t)entry->data[1] << 8);
 
-            char valBuf[12];
-            if (info == nullptr) {
-                snprintf(valBuf, sizeof(valBuf), "%02X%02X %02X%02X",
-                         entry->data[0], entry->data[1],
-                         entry->data[2], entry->data[3]);
-            } else if (info->divBy10) {
-                snprintf(valBuf, sizeof(valBuf), "%u %s", raw / 10, info->unit);
-            } else {
-                snprintf(valBuf, sizeof(valBuf), "%u %s", raw, info->unit);
-            }
-
             const char* warn = "  ";
             if (ws) {
                 if      (ws->warnHi > 0 && raw >= ws->warnHi) warn = "HI";
                 else if (ws->warnLo > 0 && raw <= ws->warnLo) warn = "LO";
             }
 
-            snprintf(line, sizeof(line), "%-3s %-10s%-2s",
-                     info ? info->mnemonic : "???", valBuf, warn);
+            if (info == nullptr) {
+                char valBuf[10];
+                snprintf(valBuf, sizeof(valBuf), "%02X%02X %02X%02X",
+                         entry->data[0], entry->data[1],
+                         entry->data[2], entry->data[3]);
+                snprintf(line, sizeof(line), "??? %-10s%-2s", valBuf, warn);
+            } else {
+                uint16_t displayVal = info->divBy10 ? raw / 10 : raw;
+                if (info->unit[0] != '\0') {
+                    snprintf(line, sizeof(line), "%-3s %6u %-3s%-2s",
+                             info->mnemonic, displayVal, info->unit, warn);
+                } else {
+                    snprintf(line, sizeof(line), "%-3s %6u    %-2s",
+                             info->mnemonic, displayVal, warn);
+                }
+            }
             lcdRow(1, line);
         }
     } else if (rtcClock.isSet()) {
@@ -550,6 +553,8 @@ void setup() {
     // leaving the bus in an unexpected state during RTC/SD startup.
     uint8_t backslashGlyph[8] = {0x10, 0x08, 0x04, 0x02, 0x01, 0x00, 0x00, 0x00};
     lcd.createChar(0, backslashGlyph);
+    uint8_t degreeGlyph[8]   = {0x06, 0x09, 0x09, 0x06, 0x00, 0x00, 0x00, 0x00};
+    lcd.createChar(1, degreeGlyph);
     lcd.setCursor(0, 0);  // Return LCD to DDRAM mode after createChar
     updateDisplay();
     sendPing();

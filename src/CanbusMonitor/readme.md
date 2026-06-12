@@ -38,7 +38,7 @@ I2C bus (A4/A5) is shared between the LCD and the DS1307 RTC.
 ```
 ┌────────────────┐
 │ACT  5 IDs SD  \│  ← line 1: status, ID count, SD indicator, spinner
-│RPM 2450 RPM    │  ← line 2: selected instrument value
+│RPM   2450      │  ← line 2: selected instrument value
 └────────────────┘
 ```
 
@@ -61,15 +61,20 @@ The rotary encoder scrolls through all CAN IDs currently in the store.
 For **known instrument IDs**, the format is:
 
 ```
-<MNEM> <value> <unit>  <WN>
-RPM  2450 RPM          (no warning)
-EGT   850 C          HI  (caution high exceeded)
-CHT   107 C          LO  (caution low exceeded)
+Col:  0123456789012345
+      VVV nnnnnn UUU**
+      RPM   2450      (no warning, no unit)
+      EGT    145 °C   (no warning)
+      EGT    145 °C HI (caution high exceeded)
+      CHT    107 °C LO (caution low exceeded)
 ```
 
-- Columns: 3 (mnemonic) + 1 (space) + 10 (value + unit, left-aligned) + 2 (warning flag)
+- Columns 0–2: 3-char mnemonic, left-aligned.
+- Columns 4–9: numeric value, **right-aligned** in a 6-char field.
+- Columns 10–12: unit, left-aligned in a 3-char field. Omitted for RPM.
+- Columns 13–15: `HI` / `LO` warn flag (right-aligned), spaces when no alert.
 - Temperature values are stored ×10 (0.1 °C resolution) and displayed as integer °C.
-- Warning flags: `HI` / `LO` appear in the last 2 characters when a threshold is exceeded.
+- The `°` symbol is a custom CGRAM character (slot 1) defined at startup.
 
 For **unknown CAN IDs**, raw bytes are shown:
 
@@ -81,9 +86,9 @@ For **unknown CAN IDs**, raw bytes are shown:
 
 | CAN ID | Mnemonic | Unit | Scale | Default warn HI |
 |--------|----------|------|-------|-----------------|
-| `0x0C0` | `RPM` | RPM | ×1 | 2800 |
-| `0x0D0` | `EGT` | C | ×10 (0.1 °C) | 1500 raw (150 °C) |
-| `0x0D1` | `CHT` | C | ×10 (0.1 °C) | 1100 raw (110 °C) |
+| `0x0C0` | `RPM` | — (not shown) | ×1 | 2800 |
+| `0x0D0` | `EGT` | °C | ×10 (0.1 °C) | 1500 raw (150 °C) |
+| `0x0D1` | `CHT` | °C | ×10 (0.1 °C) | 1100 raw (110 °C) |
 
 Warning thresholds are RAM-resident and reset on power cycle. They can be updated via
 `SET:` serial commands (see below) or by the EMS-App.
@@ -223,17 +228,17 @@ on a fresh clone).
 The version is shown on LCD line 2 during boot and printed on serial after
 `CANBUS_MONITOR_STARTED`. Use it to confirm a successful flash.
 
-## Memory usage (v1.0.5, Arduino Uno ATmega328P)
+## Memory usage (build 18, Arduino Uno ATmega328P)
 
 | Resource | Used | Total | Percentage |
 |---|---|---|---|
-| Flash | 31 052 bytes | 32 256 bytes | 96.3% |
-| RAM (static) | 1 691 bytes | 2 048 bytes | 82.6% |
+| Flash | 29 414 bytes | 32 256 bytes | 91.2% |
+| RAM (static) | 1 631 bytes | 2 048 bytes | 79.6% |
 
-Flash is near capacity. Avoid adding string literals without the `F()` macro. RAM headroom
-is approximately 357 bytes; the stack and heap share this space, so deep call chains or
-large local buffers will cause silent corruption. Any significant feature addition should be
-weighed against a RAM audit.
+Avoid adding string literals without the `F()` macro. RAM headroom is approximately
+417 bytes; the stack and heap share this space, so deep call chains or large local buffers
+will cause silent corruption. Any significant feature addition should be weighed against a
+RAM audit.
 
 ### Primary RAM consumers
 
