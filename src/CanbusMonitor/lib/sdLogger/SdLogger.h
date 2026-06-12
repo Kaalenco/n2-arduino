@@ -24,7 +24,7 @@
 
 namespace CanMonitor {
 
-static const uint16_t MAX_LOGGED_IDS   = 12;
+static const uint8_t  MAX_LOGGED_IDS   = 8;
 static const uint32_t THROTTLE_MS      = 500;   // max one write per ID per 500 ms (~2/sec)
 
 class SdLogger {

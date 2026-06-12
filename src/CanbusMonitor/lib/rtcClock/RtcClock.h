@@ -58,6 +58,20 @@ public:
         }
     }
 
+    // Returns "HH:MM:SS" (buf must be ≥ 9 bytes), or "" if time not set.
+    void getTimeDisplay(char* buf9) const {
+        if (!_timeSet) { buf9[0] = '\0'; return; }
+        DateTime now = _rtc.now();
+        sprintf(buf9, "%02u:%02u:%02u", now.hour(), now.minute(), now.second());
+    }
+
+    // Returns "DD-MM-YYYY" (buf must be ≥ 11 bytes), or "" if time not set.
+    void getDateDisplay(char* buf11) const {
+        if (!_timeSet) { buf11[0] = '\0'; return; }
+        DateTime now = _rtc.now();
+        sprintf(buf11, "%02u-%02u-%04u", now.day(), now.month(), now.year());
+    }
+
 private:
     RTC_DS1307 _rtc;
     bool _rtcFound;
