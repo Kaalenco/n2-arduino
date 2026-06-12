@@ -10,9 +10,10 @@ static const uint32_t CAN_ID_CONFIG      = 0x7E0;
 static const uint32_t CAN_ID_SYSRESET    = 0x7EF;
 static const uint8_t  SYSTEM_TYPE_MOCK   = 0x10;
 
-static const uint16_t CAN_ID_RPM = 0x0C0;
-static const uint16_t CAN_ID_EGT = 0x0D0;  // temperature ×10 (0.1 °C units)
-static const uint16_t CAN_ID_CHT = 0x0D1;  // temperature ×10 (0.1 °C units)
+// CanFIX parameter IDs — see docs/canfix/src/canfix.json
+static const uint16_t CAN_ID_RPM = 512;   // 0x200 N1/Engine RPM, UINT, direct
+static const uint16_t CAN_ID_EGT = 1282;  // 0x502 Exhaust Gas Temperature, UINT, x0.1 C
+static const uint16_t CAN_ID_CHT = 1280;  // 0x500 Cylinder Head Temperature, UINT, x0.1 C
 
 static const unsigned long RPM_SEND_MS  = 1000;
 static const unsigned long TEMP_SEND_MS = 10000;

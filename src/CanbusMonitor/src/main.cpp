@@ -35,13 +35,17 @@ struct CanIdInfo {
     uint32_t id;
     char     mnemonic[4];  // 3 chars + null
     char     unit[5];      // up to 4 chars + null
-    bool     divBy10;      // raw value is ×10 — divide before display
+    uint8_t  divisor;      // display value = raw / divisor (1 = direct)
 };
 
+// CanFIX parameter IDs — see docs/canfix/src/canfix.json
 static const CanIdInfo CAN_INFO_TABLE[] = {
-    { 0x0C0, "RPM", "",    false },
-    { 0x0D0, "EGT", "\001C", true  },
-    { 0x0D1, "CHT", "\001C", true  },
+    { 512,  "RPM", "",      1   },  // N1/Engine RPM — UINT, direct
+    { 1282, "EGT", "\001C", 10  },  // Exhaust Gas Temperature — UINT, x0.1 C
+    { 1280, "CHT", "\001C", 10  },  // Cylinder Head Temperature — UINT, x0.1 C
+    { 1030, "OAT", "\001C", 100 },  // Total Air Temperature — INT, x0.01 C
+    { 1031, "IAT", "\001C", 100 },  // Static Air Temperature — INT, x0.01 C
+    { 388,  "ALT", "ft",    1   },  // Indicated Altitude — DINT, ft (lower 2 bytes)
 };
 static const uint8_t CAN_INFO_COUNT = sizeof(CAN_INFO_TABLE) / sizeof(CAN_INFO_TABLE[0]);
 
@@ -61,9 +65,9 @@ struct CanWarnState {
 };
 
 static CanWarnState warnTable[] = {
-    { 0x0C0, 2800, 0 },     // RPM: default redline 2800
-    { 0x0D0, 1500, 0 },     // EGT: default caution high 150°C (raw 1500)
-    { 0x0D1, 1100, 0 },     // CHT: default caution high 110°C (raw 1100)
+    { 512,  2800, 0 },  // RPM: default redline 2800
+    { 1282, 1500, 0 },  // EGT: default caution high 150 C (raw 1500 in x0.1)
+    { 1280, 1100, 0 },  // CHT: default caution high 110 C (raw 1100 in x0.1)
 };
 static const uint8_t WARN_TABLE_SIZE = sizeof(warnTable) / sizeof(warnTable[0]);
 
@@ -187,7 +191,7 @@ void updateDisplay() {
                          entry->data[2], entry->data[3]);
                 snprintf(line, sizeof(line), "??? %-10s%-2s", valBuf, warn);
             } else {
-                uint16_t displayVal = info->divBy10 ? raw / 10 : raw;
+                uint16_t displayVal = raw / info->divisor;
                 if (info->unit[0] != '\0') {
                     snprintf(line, sizeof(line), "%-3s %6u %-3s%-2s",
                              info->mnemonic, displayVal, info->unit, warn);
@@ -264,11 +268,11 @@ static bool lookupConfig(const char* type, const char* param,
 static void applyLocalConfig(uint8_t targetType, uint8_t paramId, uint16_t value) {
     uint32_t canId = 0;
     bool isHi = false;
-    if      (targetType == 0x01 && paramId == 0x03) { canId = 0x0C0; isHi = true;  }
-    else if (targetType == 0x03 && paramId == 0x02) { canId = 0x0D0; isHi = true;  }
-    else if (targetType == 0x03 && paramId == 0x01) { canId = 0x0D0; isHi = false; }
-    else if (targetType == 0x04 && paramId == 0x02) { canId = 0x0D1; isHi = true;  }
-    else if (targetType == 0x04 && paramId == 0x01) { canId = 0x0D1; isHi = false; }
+    if      (targetType == 0x01 && paramId == 0x03) { canId = 512;  isHi = true;  }
+    else if (targetType == 0x03 && paramId == 0x02) { canId = 1282; isHi = true;  }
+    else if (targetType == 0x03 && paramId == 0x01) { canId = 1282; isHi = false; }
+    else if (targetType == 0x04 && paramId == 0x02) { canId = 1280; isHi = true;  }
+    else if (targetType == 0x04 && paramId == 0x01) { canId = 1280; isHi = false; }
     if (canId == 0) return;
     CanWarnState* ws = findWarnState(canId);
     if (!ws) return;

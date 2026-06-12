@@ -84,11 +84,20 @@ For **unknown CAN IDs**, raw bytes are shown:
 
 ### Known instrument IDs
 
-| CAN ID | Mnemonic | Unit | Scale | Default warn HI |
-|--------|----------|------|-------|-----------------|
-| `0x0C0` | `RPM` | — (not shown) | ×1 | 2800 |
-| `0x0D0` | `EGT` | °C | ×10 (0.1 °C) | 1500 raw (150 °C) |
-| `0x0D1` | `CHT` | °C | ×10 (0.1 °C) | 1100 raw (110 °C) |
+All IDs follow the [CanFIX](../docs/canfix/src/canfix.json) parameter specification.
+
+| CanFIX ID | Hex | Mnemonic | Unit | CanFIX scale | Display | Default warn HI |
+|-----------|-----|----------|------|--------------|---------|-----------------|
+| 512 | `0x200` | `RPM` | — (not shown) | direct | raw value | 2800 |
+| 1280 | `0x500` | `CHT` | °C | ×0.1 °C | raw ÷ 10 | 1100 raw (110 °C) |
+| 1282 | `0x502` | `EGT` | °C | ×0.1 °C | raw ÷ 10 | 1500 raw (150 °C) |
+| 1030 | `0x406` | `OAT` | °C | ×0.01 °C | raw ÷ 100 | — |
+| 1031 | `0x407` | `IAT` | °C | ×0.01 °C | raw ÷ 100 | — |
+| 388 | `0x184` | `ALT` | ft | DINT, ft | lower 16 bits | — |
+
+**Adding a new instrument ID:** assign the CanFIX parameter ID from `canfix.json`, add it to
+`CAN_INFO_TABLE` in `main.cpp` with the matching divisor (1, 10, or 100), and add a
+`CanWarnState` entry if warn thresholds are required.
 
 Warning thresholds are RAM-resident and reset on power cycle. They can be updated via
 `SET:` serial commands (see below) or by the EMS-App.
