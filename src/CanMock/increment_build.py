@@ -1,7 +1,7 @@
 Import("env")
 import re, os
 
-build_file = os.path.join(os.path.dirname(__file__), "src", "build_number.h")
+build_file = os.path.join(env.subst("$PROJECT_DIR"), "src", "build_number.h")
 
 build = 0
 if os.path.exists(build_file):
