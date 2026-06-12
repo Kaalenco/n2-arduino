@@ -121,7 +121,7 @@ void lcdRow(uint8_t row, const char* text) {
 
 void updateDisplay() {
     static uint8_t spinnerIdx = 0;
-    static const char spinnerChars[] = {'|', '/', '-', '\\'};
+    static const uint8_t spinnerChars[] = {'|', '/', '-', 0};  // 0 = CGRAM backslash glyph
 
     char line[LCD_COLS + 1];
 
@@ -466,6 +466,9 @@ void setup() {
 
     lcd.init();
     lcd.backlight();
+    // Custom CGRAM slot 0: backslash glyph (0x5C maps to ¥ in the HD44780A00 ROM)
+    uint8_t backslashGlyph[8] = {0x10, 0x08, 0x04, 0x02, 0x01, 0x00, 0x00, 0x00};
+    lcd.createChar(0, backslashGlyph);
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print(F("Canbus Monitor"));
