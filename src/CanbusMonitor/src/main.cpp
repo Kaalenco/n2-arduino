@@ -92,11 +92,21 @@ uint8_t   canSpeedIndex;
 uint16_t  deviceId;
 uint16_t  aircraftId;
 
+enum SetupType : uint8_t { SETUP_NONE = 0, SETUP_ALT, SETUP_TIME, SETUP_DATE };
+
 int8_t      selectedIndex  = 0;
 bool        lcdBacklightOn = true;
-bool        setupMode      = false;
+SetupType   setupMode      = SETUP_NONE;
+uint8_t     setupField     = 0;
 uint16_t    setupQnh       = QNH_DEFAULT_HPA;
-uint16_t    receivedQnhRaw = 0;  // x0.001 inHg received from bus; 0 = not yet received
+uint16_t    editYear       = 2024;
+uint8_t     editMonth      = 1;
+uint8_t     editDay        = 1;
+uint8_t     editHour       = 0;
+uint8_t     editMinute     = 0;
+bool        flashVisible   = true;
+unsigned long lastFlashMs  = 0;
+uint16_t    receivedQnhRaw = 0;  // hPa received from BFI broadcast; 0 = not yet received
 bool        busActive      = false;
 bool        busError       = false;
 unsigned long lastMessageMs = 0;
@@ -150,6 +160,20 @@ static bool selectedIsAlt() {
     return entry != nullptr && entry->id == 388;
 }
 
+static bool selectedIsTime() {
+    if (!rtcClock.isSet()) return false;
+    uint8_t canCount = store.count();
+    if (selectedIndex < (int8_t)canCount) return false;
+    return ((uint8_t)selectedIndex - canCount) == 0;
+}
+
+static bool selectedIsDate() {
+    if (!rtcClock.isSet()) return false;
+    uint8_t canCount = store.count();
+    if (selectedIndex < (int8_t)canCount) return false;
+    return ((uint8_t)selectedIndex - canCount) == 1;
+}
+
 static void sendQnhUpdate(uint16_t qnhHpa) {
     CanBusInterface::Message msg;
     msg.id       = CAN_ID_ALT_SETTING;
@@ -180,24 +204,47 @@ void updateDisplay() {
 
     char line[LCD_COLS + 1];
 
-    if (setupMode) {
-        const CanMonitor::CanEntry* selEntry = (selectedIndex < (int8_t)store.count())
-            ? store.getAt((uint8_t)selectedIndex) : nullptr;
-        const CanIdInfo* info = selEntry ? findCanInfo(selEntry->id) : nullptr;
-        snprintf(line, sizeof(line), "SETUP %-3s", info ? info->mnemonic : "???");
-        lcdRow(0, line);
+    if (setupMode != SETUP_NONE) {
+        if (setupMode == SETUP_ALT) {
+            const CanMonitor::CanEntry* selEntry = (selectedIndex < (int8_t)store.count())
+                ? store.getAt((uint8_t)selectedIndex) : nullptr;
+            const CanIdInfo* info = selEntry ? findCanInfo(selEntry->id) : nullptr;
+            snprintf(line, sizeof(line), "SETUP %-3s", info ? info->mnemonic : "???");
+            lcdRow(0, line);
+            const CanMonitor::CanEntry* altEntry = findEntryById(388);
+            if (altEntry) {
+                int32_t altFt = (int32_t)((uint32_t)altEntry->data[0]
+                              | ((uint32_t)altEntry->data[1] << 8)
+                              | ((uint32_t)altEntry->data[2] << 16)
+                              | ((uint32_t)altEntry->data[3] << 24));
+                snprintf(line, sizeof(line), "QNH %4u  %4ldft", setupQnh, (long)altFt);
+            } else {
+                snprintf(line, sizeof(line), "QNH %4u  ----ft", setupQnh);
+            }
+            lcdRow(1, line);
 
-        const CanMonitor::CanEntry* altEntry = findEntryById(388);
-        if (altEntry) {
-            int32_t altFt = (int32_t)((uint32_t)altEntry->data[0]
-                          | ((uint32_t)altEntry->data[1] << 8)
-                          | ((uint32_t)altEntry->data[2] << 16)
-                          | ((uint32_t)altEntry->data[3] << 24));
-            snprintf(line, sizeof(line), "QNH %4u  %4ldft", setupQnh, (long)altFt);
-        } else {
-            snprintf(line, sizeof(line), "QNH %4u  ----ft", setupQnh);
+        } else if (setupMode == SETUP_TIME) {
+            lcdRow(0, "SETUP TIME");
+            char hh[3], mm[3];
+            if (flashVisible || setupField != 0) snprintf(hh, sizeof(hh), "%02u", editHour);
+            else { hh[0] = hh[1] = ' '; hh[2] = '\0'; }
+            if (flashVisible || setupField != 1) snprintf(mm, sizeof(mm), "%02u", editMinute);
+            else { mm[0] = mm[1] = ' '; mm[2] = '\0'; }
+            snprintf(line, sizeof(line), "%s:%s", hh, mm);
+            lcdRow(1, line);
+
+        } else {  // SETUP_DATE
+            lcdRow(0, "SETUP DATE");
+            char dd[3], mon[3], yyyy[5];
+            if (flashVisible || setupField != 0) snprintf(dd,   sizeof(dd),   "%02u", editDay);
+            else { dd[0] = dd[1] = ' '; dd[2] = '\0'; }
+            if (flashVisible || setupField != 1) snprintf(mon,  sizeof(mon),  "%02u", editMonth);
+            else { mon[0] = mon[1] = ' '; mon[2] = '\0'; }
+            if (flashVisible || setupField != 2) snprintf(yyyy, sizeof(yyyy), "%04u", editYear);
+            else { yyyy[0] = yyyy[1] = yyyy[2] = yyyy[3] = ' '; yyyy[4] = '\0'; }
+            snprintf(line, sizeof(line), "%s-%s-%s", dd, mon, yyyy);
+            lcdRow(1, line);
         }
-        lcdRow(1, line);
         return;
     }
 
@@ -594,12 +641,32 @@ void loop() {
     int8_t step = rotary.getStep();
     uint8_t total = totalItems();
     if (step != 0) {
-        if (setupMode) {
+        if (setupMode == SETUP_ALT) {
             int16_t newQnh = (int16_t)setupQnh + step;
             if (newQnh < (int16_t)QNH_MIN_HPA) newQnh = (int16_t)QNH_MIN_HPA;
             if (newQnh > (int16_t)QNH_MAX_HPA) newQnh = (int16_t)QNH_MAX_HPA;
             setupQnh = (uint16_t)newQnh;
             sendQnhUpdate(setupQnh);
+        } else if (setupMode == SETUP_TIME) {
+            if (setupField == 0)
+                editHour   = (uint8_t)((editHour   + step + 24) % 24);
+            else
+                editMinute = (uint8_t)((editMinute + step + 60) % 60);
+            flashVisible = true;
+            lastFlashMs  = millis();
+        } else if (setupMode == SETUP_DATE) {
+            if (setupField == 0)
+                editDay   = (uint8_t)(((int)editDay   - 1 + step + 31) % 31) + 1;
+            else if (setupField == 1)
+                editMonth = (uint8_t)(((int)editMonth - 1 + step + 12) % 12) + 1;
+            else {
+                int16_t y = (int16_t)editYear + step;
+                if (y < 2024) y = 2024;
+                if (y > 2099) y = 2099;
+                editYear = (uint16_t)y;
+            }
+            flashVisible = true;
+            lastFlashMs  = millis();
         } else if (total > 0) {
             selectedIndex += step;
             if (selectedIndex < 0)              selectedIndex = (int8_t)(total - 1);
@@ -627,14 +694,44 @@ void loop() {
             }
             if (!stillHeld) {
                 if (!keyHandled) {
-                    if (setupMode) {
-                        setupMode = false;
+                    if (setupMode == SETUP_ALT) {
+                        setupMode = SETUP_NONE;
+                    } else if (setupMode == SETUP_TIME) {
+                        if (setupField < 1) {
+                            setupField++;
+                            flashVisible = true;
+                            lastFlashMs  = millis();
+                        } else {
+                            rtcClock.setFromComponents(editYear, editMonth, editDay, editHour, editMinute);
+                            setupMode = SETUP_NONE;
+                        }
+                    } else if (setupMode == SETUP_DATE) {
+                        if (setupField < 2) {
+                            setupField++;
+                            flashVisible = true;
+                            lastFlashMs  = millis();
+                        } else {
+                            rtcClock.setFromComponents(editYear, editMonth, editDay, editHour, editMinute);
+                            setupMode = SETUP_NONE;
+                        }
                     } else if (selectedIsAlt()) {
                         if (receivedQnhRaw >= QNH_MIN_HPA && receivedQnhRaw <= QNH_MAX_HPA) {
                             setupQnh = receivedQnhRaw;
                         }
-                        setupMode = true;
+                        setupMode = SETUP_ALT;
                         sendQnhUpdate(setupQnh);
+                    } else if (selectedIsTime()) {
+                        rtcClock.getComponents(editYear, editMonth, editDay, editHour, editMinute);
+                        setupMode    = SETUP_TIME;
+                        setupField   = 0;
+                        flashVisible = true;
+                        lastFlashMs  = millis();
+                    } else if (selectedIsDate()) {
+                        rtcClock.getComponents(editYear, editMonth, editDay, editHour, editMinute);
+                        setupMode    = SETUP_DATE;
+                        setupField   = 0;
+                        flashVisible = true;
+                        lastFlashMs  = millis();
                     } else {
                         lcdBacklightOn = !lcdBacklightOn;
                         if (lcdBacklightOn) lcd.backlight(); else lcd.noBacklight();
@@ -676,6 +773,14 @@ void loop() {
     processSerial();
 
     unsigned long now = millis();
+
+    if (setupMode == SETUP_TIME || setupMode == SETUP_DATE) {
+        if (now - lastFlashMs >= 500) {
+            lastFlashMs  = now;
+            flashVisible = !flashVisible;
+        }
+    }
+
     if (now - lastDisplayMs >= DISPLAY_REFRESH_MS) {
         lastDisplayMs = now;
         updateDisplay();

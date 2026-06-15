@@ -36,6 +36,28 @@ public:
         return true;
     }
 
+    // Read current time components for interactive editing.
+    bool getComponents(uint16_t& year, uint8_t& month, uint8_t& day,
+                       uint8_t& hour, uint8_t& minute) {
+        if (!_timeSet) return false;
+        DateTime now = _rtc.now();
+        year   = now.year();
+        month  = now.month();
+        day    = now.day();
+        hour   = now.hour();
+        minute = now.minute();
+        return true;
+    }
+
+    // Set RTC from individual components; seconds are always reset to 0.
+    bool setFromComponents(uint16_t year, uint8_t month, uint8_t day,
+                           uint8_t hour, uint8_t minute) {
+        if (!_rtcFound) return false;
+        _rtc.adjust(DateTime(year, month, day, hour, minute, 0));
+        _timeSet = true;
+        return true;
+    }
+
     // Returns current date as "YYYYMMDD" for file naming, or "" if time not set.
     void getDateString(char* buf8) const {
         if (!_timeSet) {
