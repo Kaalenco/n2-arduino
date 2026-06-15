@@ -59,7 +59,7 @@ public:
     }
 
     // Returns current date as "YYYYMMDD" for file naming, or "" if time not set.
-    void getDateString(char* buf8) const {
+    void getDateString(char* buf8) {
         if (!_timeSet) {
             buf8[0] = '\0';
             return;
@@ -69,7 +69,7 @@ public:
     }
 
     // Returns timestamp as "YYYY-MM-DD HH:MM:SS" or "T+<ms>" if time not set.
-    void getTimestamp(char* buf20) const {
+    void getTimestamp(char* buf20) {
         if (_timeSet) {
             DateTime now = _rtc.now();
             sprintf(buf20, "%04u-%02u-%02u %02u:%02u:%02u",
@@ -81,14 +81,14 @@ public:
     }
 
     // Returns "HH:MM:SS" (buf must be ≥ 9 bytes), or "" if time not set.
-    void getTimeDisplay(char* buf9) const {
+    void getTimeDisplay(char* buf9) {
         if (!_timeSet) { buf9[0] = '\0'; return; }
         DateTime now = _rtc.now();
         sprintf(buf9, "%02u:%02u:%02u", now.hour(), now.minute(), now.second());
     }
 
     // Returns "DD-MM-YYYY" (buf must be ≥ 11 bytes), or "" if time not set.
-    void getDateDisplay(char* buf11) const {
+    void getDateDisplay(char* buf11) {
         if (!_timeSet) { buf11[0] = '\0'; return; }
         DateTime now = _rtc.now();
         sprintf(buf11, "%02u-%02u-%04u", now.day(), now.month(), now.year());
