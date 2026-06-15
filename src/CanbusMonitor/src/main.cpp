@@ -7,7 +7,6 @@
 #include <CanMessageStore.h>
 #include <RotaryControl.h>
 #include <RtcClock.h>
-#include <SdLogger.h>
 #include <PinsMap.h>
 #include <CanMonitorMemoryMap.h>
 #include "version.h"
@@ -15,6 +14,11 @@
 static const unsigned long DISPLAY_REFRESH_MS = 250;
 static const unsigned long BUS_TIMEOUT_MS     = 3000;
 static const unsigned long PING_INTERVAL_MS   = 4000;
+
+static const uint16_t CAN_ID_ALT_SETTING = 400;   // 0x190 Altimeter Setting, hPa uint16
+static const uint16_t QNH_MIN_HPA        = 940;
+static const uint16_t QNH_MAX_HPA        = 1050;
+static const uint16_t QNH_DEFAULT_HPA    = 1013;
 
 static const CanBusInterface::Speed SPEED_TABLE[] = {
     CanBusInterface::SPEED_125KBPS,
@@ -88,13 +92,13 @@ uint8_t   canSpeedIndex;
 uint16_t  deviceId;
 uint16_t  aircraftId;
 
-CanMonitor::SdLogger* sdLogger = nullptr;
-
 int8_t      selectedIndex  = 0;
 bool        lcdBacklightOn = true;
+bool        setupMode      = false;
+uint16_t    setupQnh       = QNH_DEFAULT_HPA;
+uint16_t    receivedQnhRaw = 0;  // x0.001 inHg received from bus; 0 = not yet received
 bool        busActive      = false;
 bool        busError       = false;
-bool        sdReady        = false;
 unsigned long lastMessageMs = 0;
 unsigned long lastDisplayMs = 0;
 unsigned long lastPingMs    = 0;
@@ -132,6 +136,32 @@ void loadConfig() {
     if (deviceId == 0) deviceId = CM_DEFAULT_DEVICE_ID;
 }
 
+static const CanMonitor::CanEntry* findEntryById(uint16_t id) {
+    for (uint8_t i = 0; i < store.count(); i++) {
+        const CanMonitor::CanEntry* e = store.getAt(i);
+        if (e && e->id == id) return e;
+    }
+    return nullptr;
+}
+
+static bool selectedIsAlt() {
+    if (selectedIndex >= (int8_t)store.count()) return false;
+    const CanMonitor::CanEntry* entry = store.getAt((uint8_t)selectedIndex);
+    return entry != nullptr && entry->id == 388;
+}
+
+static void sendQnhUpdate(uint16_t qnhHpa) {
+    CanBusInterface::Message msg;
+    msg.id       = CAN_ID_ALT_SETTING;
+    msg.length   = 2;
+    msg.extended = false;
+    msg.rtr      = false;
+    msg.data[0]  = qnhHpa & 0xFF;
+    msg.data[1]  = (qnhHpa >> 8) & 0xFF;
+    memset(msg.data + 2, 0, 6);
+    can.sendMessage(msg);
+}
+
 void lcdRow(uint8_t row, const char* text) {
     char buf[LCD_COLS + 1];
     snprintf(buf, sizeof(buf), "%-16s", text);
@@ -150,18 +180,38 @@ void updateDisplay() {
 
     char line[LCD_COLS + 1];
 
+    if (setupMode) {
+        const CanMonitor::CanEntry* selEntry = (selectedIndex < (int8_t)store.count())
+            ? store.getAt((uint8_t)selectedIndex) : nullptr;
+        const CanIdInfo* info = selEntry ? findCanInfo(selEntry->id) : nullptr;
+        snprintf(line, sizeof(line), "SETUP %-3s", info ? info->mnemonic : "???");
+        lcdRow(0, line);
+
+        const CanMonitor::CanEntry* altEntry = findEntryById(388);
+        if (altEntry) {
+            int32_t altFt = (int32_t)((uint32_t)altEntry->data[0]
+                          | ((uint32_t)altEntry->data[1] << 8)
+                          | ((uint32_t)altEntry->data[2] << 16)
+                          | ((uint32_t)altEntry->data[3] << 24));
+            snprintf(line, sizeof(line), "QNH %4u  %4ldft", setupQnh, (long)altFt);
+        } else {
+            snprintf(line, sizeof(line), "QNH %4u  ----ft", setupQnh);
+        }
+        lcdRow(1, line);
+        return;
+    }
+
     if (busError) {
         lcdRow(0, "BUS ERROR");
     } else if (busActive || store.count() > 0) {
         const char* stateLabel = busActive ? "ACT" : "TMO";
-        snprintf(line, sizeof(line), "%-3s %2u %c %s %c",
+        snprintf(line, sizeof(line), "%-3s %2u %c    %c",
                  stateLabel, store.count(),
                  hasAlert() ? '*' : ' ',
-                 sdReady ? "SD" : "  ",
                  rtcClock.isSet() ? 'C' : ' ');
         lcdRow(0, line);
     } else {
-        lcdRow(0, sdReady ? "WAITING... SD" : "WAITING...");
+        lcdRow(0, "WAITING...");
     }
 
     lcd.setCursor(15, 0);
@@ -302,7 +352,6 @@ void processSerial() {
             return;
         }
         if (rtcClock.setFromUnix(unixTime)) {
-            if (sdLogger) sdLogger->onTimeSet();
             Serial.println(F("RTC set."));
         } else {
             Serial.println(F("ERR: RTC not found"));
@@ -316,7 +365,6 @@ void processSerial() {
         }
         EEPROM.put(EEPROM_CM_DEVICE_ID, id);
         deviceId = id;
-        if (sdLogger) sdLogger->setDeviceId(id);
         Serial.print(F("Device ID set to 0x")); Serial.println(id, HEX);
 
     } else if (strncmp_P(cmd, PSTR("AIRCRAFT:"), 9) == 0) {
@@ -327,7 +375,6 @@ void processSerial() {
         }
         EEPROM.put(EEPROM_CM_AIRCRAFT_ID, id);
         aircraftId = id;
-        if (sdLogger) sdLogger->setAircraftId(id);
         Serial.print(F("Aircraft ID set to 0x")); Serial.println(id, HEX);
 
     } else if (strncmp_P(cmd, PSTR("SPEED:"), 6) == 0) {
@@ -373,19 +420,6 @@ void processSerial() {
         void (*reset)() = nullptr;
         reset();
 
-    } else if (strncmp_P(cmd, PSTR("DOWNLOAD:"), 9) == 0) {
-        if (!sdReady) { Serial.println(F("ERR: SD not available")); return; }
-        char folder[8];
-        sprintf(folder, "%04X", deviceId);
-        char path[24];
-        sprintf(path, "%s/%s_%s.csv", folder, folder, cmd + 9);
-        File f = SD.open(path);
-        if (!f) { Serial.print(F("ERR: not found: ")); Serial.println(path); return; }
-        Serial.print(F("BEGIN:")); Serial.println(path);
-        while (f.available()) Serial.write(f.read());
-        f.close();
-        Serial.println(F("END"));
-
     } else if (strcmp_P(cmd, PSTR("SYSRESET")) == 0) {
         sendBusReset();
         Serial.println(F("SYSRESET broadcast."));
@@ -414,7 +448,7 @@ void processSerial() {
         Serial.print('='); Serial.println(value);
 
     } else {
-        Serial.println(F("Commands: TIME:<unix>  DEVID:<hex4>  AIRCRAFT:<hex4>  SPEED:<kbps>  CLEAR  LIST  RESET  DOWNLOAD:<date>  SYSRESET  SET:<TYPE>:<PARAM>:<VALUE>"));
+        Serial.println(F("Commands: TIME:<unix>  DEVID:<hex4>  AIRCRAFT:<hex4>  SPEED:<kbps>  CLEAR  LIST  RESET  SYSRESET  SET:<TYPE>:<PARAM>:<VALUE>"));
     }
 }
 
@@ -433,8 +467,6 @@ void sendPing() {
     Serial.print(canState);
     Serial.print(F(" ids="));
     Serial.print(store.count());
-    Serial.print(F(" sd="));
-    Serial.print(sdReady ? F("OK") : F("FAIL"));
     Serial.print(F(" rtc="));
     Serial.println(rtcClock.isSet() ? ts : "none");
 }
@@ -523,14 +555,6 @@ void setup() {
         Serial.println(F("RTC OK"));
     }
 
-    sdLogger = new CanMonitor::SdLogger(PIN_SD_CS, rtcClock, deviceId, aircraftId);
-    sdReady  = sdLogger->begin();
-    if (!sdReady) {
-        Serial.println(F("SD init FAILED"));
-    } else {
-        Serial.println(F("SD OK"));
-    }
-
     Serial.println(F("CANBUS_MONITOR_STARTED"));
     Serial.print(F("Firmware: v"));
     Serial.print(FW_MAJOR); Serial.print('.'); Serial.print(FW_MINOR); Serial.print('.'); Serial.println(FW_BUILD);
@@ -569,10 +593,18 @@ void loop() {
 
     int8_t step = rotary.getStep();
     uint8_t total = totalItems();
-    if (step != 0 && total > 0) {
-        selectedIndex += step;
-        if (selectedIndex < 0)                    selectedIndex = (int8_t)(total - 1);
-        if (selectedIndex >= (int8_t)total)       selectedIndex = 0;
+    if (step != 0) {
+        if (setupMode) {
+            int16_t newQnh = (int16_t)setupQnh + step;
+            if (newQnh < (int16_t)QNH_MIN_HPA) newQnh = (int16_t)QNH_MIN_HPA;
+            if (newQnh > (int16_t)QNH_MAX_HPA) newQnh = (int16_t)QNH_MAX_HPA;
+            setupQnh = (uint16_t)newQnh;
+            sendQnhUpdate(setupQnh);
+        } else if (total > 0) {
+            selectedIndex += step;
+            if (selectedIndex < 0)              selectedIndex = (int8_t)(total - 1);
+            if (selectedIndex >= (int8_t)total) selectedIndex = 0;
+        }
     }
 
     // Short press: toggle backlight.  Hold ≥ 5 s: software reset.
@@ -595,8 +627,18 @@ void loop() {
             }
             if (!stillHeld) {
                 if (!keyHandled) {
-                    lcdBacklightOn = !lcdBacklightOn;
-                    if (lcdBacklightOn) lcd.backlight(); else lcd.noBacklight();
+                    if (setupMode) {
+                        setupMode = false;
+                    } else if (selectedIsAlt()) {
+                        if (receivedQnhRaw >= QNH_MIN_HPA && receivedQnhRaw <= QNH_MAX_HPA) {
+                            setupQnh = receivedQnhRaw;
+                        }
+                        setupMode = true;
+                        sendQnhUpdate(setupQnh);
+                    } else {
+                        lcdBacklightOn = !lcdBacklightOn;
+                        if (lcdBacklightOn) lcd.backlight(); else lcd.noBacklight();
+                    }
                 }
                 keyPressedAt = 0;
                 keyHandled   = false;
@@ -607,7 +649,9 @@ void loop() {
     if (!busError && can.messageAvailable()) {
         CanBusInterface::Message msg;
         if (can.receiveMessage(msg) == CanBusInterface::OK) {
-            if (msg.id < CAN_ID_CONFIG) {  // skip system/command IDs (≥ 0x7E0)
+            if (msg.id == CAN_ID_ALT_SETTING && msg.length >= 2) {
+                receivedQnhRaw = (uint16_t)msg.data[0] | ((uint16_t)msg.data[1] << 8);
+            } else if (msg.id < CAN_ID_CONFIG) {  // skip system/command IDs (≥ 0x7E0)
                 store.update(msg);
             }
             lastMessageMs = millis();
@@ -622,7 +666,6 @@ void loop() {
             }
             Serial.println();
 
-            if (sdLogger) sdLogger->log(msg);
         }
     }
 

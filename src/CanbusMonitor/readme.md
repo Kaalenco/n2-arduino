@@ -108,10 +108,28 @@ CAN IDs ≥ `0x7E0` (system and command frames) are never stored or displayed.
 
 | Action | Effect |
 |---|---|
-| Rotate CW | Select next tracked CAN ID |
-| Rotate CCW | Select previous tracked CAN ID |
-| Short press | Toggle LCD backlight on/off |
+| Rotate CW | Select next tracked CAN ID (or increase QNH in setup mode) |
+| Rotate CCW | Select previous tracked CAN ID (or decrease QNH in setup mode) |
+| Short press on ALT | Enter ALT setup mode (adjust QNH, sends to flight instruments) |
+| Short press in setup | Exit setup mode, return to normal display |
+| Short press on other items | Toggle LCD backlight on/off |
 | Hold ≥ 5 s | Software reset |
+
+### ALT setup mode
+
+When the ALT item is selected and the button is pressed, the display switches to:
+
+```
+┌────────────────┐
+│SETUP ALT       │  ← line 1: setup context
+│QNH 1013  2000ft│  ← line 2: current QNH (hPa) and altitude from flight instruments
+└────────────────┘
+```
+
+Rotating adjusts the QNH value (±1 hPa per step, clamped 940–1050 hPa). Each step
+immediately sends the new QNH to the BasicFlightInstruments node via CAN ID 400.
+The altitude shown is the live value received from the flight instruments.
+Press the button to exit setup mode.
 
 Direction decoding uses the KY-040 quadrature method: direction is sampled on the rising
 edge of CLK (S1). Debounce: 50 ms cooldown on CLK, 20 ms on the push button.
@@ -237,25 +255,21 @@ on a fresh clone).
 The version is shown on LCD line 2 during boot and printed on serial after
 `CANBUS_MONITOR_STARTED`. Use it to confirm a successful flash.
 
-## Memory usage (build 19, Arduino Uno ATmega328P)
+## Memory usage (build 22, Arduino Uno ATmega328P)
 
 | Resource | Used | Total | Percentage |
 |---|---|---|---|
-| Flash | 29 516 bytes | 32 256 bytes | 91.5% |
-| RAM (static) | 1 673 bytes | 2 048 bytes | 81.7% |
+| Flash | 19 282 bytes | 32 256 bytes | 59.8% |
+| RAM (static) | 1 013 bytes | 2 048 bytes | 49.5% |
 
-Avoid adding string literals without the `F()` macro. RAM headroom is approximately
-375 bytes; the stack and heap share this space, so deep call chains or large local buffers
-will cause silent corruption. Any significant feature addition should be weighed against a
-RAM audit.
+RAM headroom is approximately 1 035 bytes shared between stack and heap.
+Avoid adding string literals without the `F()` macro.
 
 ### Primary RAM consumers
 
 | Item | Approximate size |
 |---|---|
-| `CanMessageStore` (12 entries × ~12 bytes) | ~144 bytes |
+| `CanMessageStore` (8 entries × ~6 bytes) | ~48 bytes |
 | LCD buffer + I2C library state | ~64 bytes |
-| SD library buffers | ~512 bytes |
-| `SdLogger` struct | ~32 bytes |
 | Serial receive buffer | 64 bytes |
 | Stack (estimated, varies) | ~200–300 bytes |

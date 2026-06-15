@@ -17,10 +17,9 @@ static const uint8_t  SYSTEM_TYPE_BFI   = 0x03;
 static const uint16_t CAN_ID_ALT     = 388;   // 0x184 Indicated Altitude, DINT, ft
 static const uint16_t CAN_ID_OAT     = 1030;  // 0x406 Total Air Temperature, INT, x0.01 C
 static const uint16_t CAN_ID_IAT     = 1031;  // 0x407 Static Air Temperature, INT, x0.01 C
-static const uint16_t CAN_ID_ALT_SET = 400;   // 0x190 Altimeter Setting, UINT, x0.001 inHg (incoming)
+static const uint16_t CAN_ID_ALT_SET = 400;   // 0x190 Altimeter Setting, UINT, hPa
 
 static const unsigned long SENSOR_INTERVAL_MS = 1000;
-static const float INHG_TO_PA     = 3386.389f;
 static const float DEFAULT_QNH_PA = 101325.0f;
 
 MCP_CAN         can(PIN_CAN_CS);
@@ -61,8 +60,15 @@ static bool sendFrame32(uint16_t id, int32_t value) {
     return can.sendMsgBuf((uint32_t)id, 0, 4, data) == CAN_OK;
 }
 
+static void broadcastQnh() {
+    if (!canReady) return;
+    uint16_t hpa = (uint16_t)(qnhPa / 100.0f + 0.5f);
+    sendFrame16(CAN_ID_ALT_SET, (int16_t)hpa);
+}
+
 static void applyQnh(float pa) {
     qnhPa = pa;
+    broadcastQnh();
     Serial.print(F("QNH: "));
     Serial.print(pa / 100.0f, 2);
     Serial.println(F(" hPa"));
@@ -102,6 +108,7 @@ void setup() {
 
     bmpReady = bmp.begin();
     Serial.println(bmpReady ? F("BMP085 OK") : F("BMP085 FAILED"));
+    broadcastQnh();
 
     float t = readMAX6675();
     Serial.println(isnan(t) ? F("MAX6675 FAILED") : F("MAX6675 OK"));
@@ -125,8 +132,8 @@ static void checkIncoming() {
         void (*reset)() = nullptr;
         reset();
     } else if (rxId == CAN_ID_ALT_SET && len >= 2) {
-        uint16_t raw = (uint16_t)data[0] | ((uint16_t)data[1] << 8);
-        applyQnh(raw * 0.001f * INHG_TO_PA);
+        uint16_t hpa = (uint16_t)data[0] | ((uint16_t)data[1] << 8);
+        applyQnh(hpa * 100.0f);
     }
 }
 
@@ -152,6 +159,12 @@ void loop() {
     unsigned long now = millis();
     if (now - lastSensorMs < SENSOR_INTERVAL_MS) return;
     lastSensorMs = now;
+
+    static uint8_t qnhBroadcastTick = 0;
+    if (++qnhBroadcastTick >= 10) {
+        qnhBroadcastTick = 0;
+        broadcastQnh();
+    }
 
     float tempC = readMAX6675();
     if (!isnan(tempC)) {
