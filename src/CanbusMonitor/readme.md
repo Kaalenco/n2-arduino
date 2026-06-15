@@ -255,7 +255,7 @@ on a fresh clone).
 The version is shown on LCD line 2 during boot and printed on serial after
 `CANBUS_MONITOR_STARTED`. Use it to confirm a successful flash.
 
-## Memory usage (build 24, Arduino Uno ATmega328P)
+## Memory usage (build 26, Arduino Uno ATmega328P)
 
 | Resource | Used | Total | Percentage |
 |---|---|---|---|
